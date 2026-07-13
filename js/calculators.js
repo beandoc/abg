@@ -51,12 +51,34 @@ ABG.Calculators = (function(){
 
   function ibwPerKg(vt, weight){ return vt / weight; }
 
+  function minuteVentilation(vt, rr){ return vt * rr; }
+
+  function predictedPCO2FromVE(pco2Old, veOld, veNew){
+    if(!veOld || !veNew) return null;
+    return pco2Old * veOld / veNew;
+  }
+
+  function alveolarVentilation(vt, deadSpaceMl, rr){ return Math.max(0, vt - deadSpaceMl) * rr; }
+
+  function acuteHCO3Shift(pco2Old, pco2New, hco3Old){
+    const slope = pco2New >= pco2Old ? 0.1 : 0.2; // mEq/L per mmHg, acute non-renal buffering
+    return hco3Old + slope * (pco2New - pco2Old);
+  }
+
+  function plateauPressure(peep, vt, compliance){ return peep + vt / compliance; }
+  function drivingPressure(pplat, peep){ return pplat - peep; }
+  function mechanicalPower(rr, vtMl, pplat, dp){
+    return 0.098 * rr * (vtMl / 1000) * (pplat - dp / 2);
+  }
+
   return {
     NORMALS,
     hendersonH, phFromH, hFromPh, pctDiff, hendersonHasselbalchPH,
     wintersExpectedPCO2, metAlkExpectedPCO2,
     respAcidAcuteHCO3, respAcidChronicHCO3, respAlkAcuteHCO3, respAlkChronicHCO3,
     anionGap, correctedAnionGap, deltaRatio,
-    calcOsm, osmolalGap, urineAnionGap, aaGradient, ibwPerKg
+    calcOsm, osmolalGap, urineAnionGap, aaGradient, ibwPerKg,
+    minuteVentilation, predictedPCO2FromVE, alveolarVentilation, acuteHCO3Shift,
+    plateauPressure, drivingPressure, mechanicalPower
   };
 })();

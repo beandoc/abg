@@ -70,6 +70,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function runVentSim(){
+    const current = {
+      rr: num('respRate'), vt: num('tidalVolume'), fio2: num('fio2'), pao2: num('pao2'),
+      pco2: num('pco2'), hco3: num('hco3'), peep: num('peep'),
+      compliance: num('compliance'), vdvt: num('vdvt'), ibw: num('weight')
+    };
+    const target = { rr: num('simRR'), vt: num('simVt'), fio2: num('simFio2'), peep: num('simPeep') };
+    const result = ABG.VentSim.simulate(current, target);
+    ABG.VentSim.render($('ventSimOut'), result);
+  }
+
   $('f').addEventListener('submit', e => { e.preventDefault(); run(false); });
   $('logBtn').addEventListener('click', () => run(true));
   $('f').addEventListener('reset', () => {
@@ -82,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   $('nephroBtn').addEventListener('click', runNephro);
+  $('ventSimBtn').addEventListener('click', runVentSim);
   $('printBtn').addEventListener('click', () => ABG.Export.printReport());
 
   ABG.Trend.render($('trend'), () => ABG.Davenport.draw(null, ABG.Trend.log));
