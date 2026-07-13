@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function collectPatient(){
     ABG.Patient.set({
       name: $('patientName').value.trim(), id: $('patientId').value.trim(), bed: $('patientBed').value.trim(),
-      age: num('patientAge'), sex: $('patientSex').value
+      age: num('patientAge'), sex: $('patientSex').value, weight: num('patientWeight')
     });
   }
 
@@ -51,6 +51,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const R = ABG.Interpreter.recommend(r, d.vent);
     $('rec').innerHTML = `<ul class="rec">${R.map(([c,t])=>`<li class="${c}">${t}</li>`).join('')}</ul>`;
 
+    if(r.disorders.some(x=>x.toLowerCase().includes('metabolic alkalosis'))){
+      const wrap = document.createElement('div');
+      ABG.Alkalosis.render(wrap, { hco3:d.hco3, cl:d.cl, ph:d.ph, uCl:d.uCl, weight:num('patientWeight') });
+      $('rec').innerHTML += `<div class="subhead">Chloride/HCl dosing (Marino Ch.33)</div>${wrap.innerHTML}`;
+    }
+
     lastAnalysis = { d, r };
 
     if(logIt){
@@ -68,12 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ph:d.ph, pco2:d.pco2, hco3:d.hco3, na:d.na, k:d.k, cl:d.cl, lactate:d.lactate,
       albumin:d.albumin, bun:d.bun, glucose:d.glucose, calcOsm
     });
-  }
-
-  function runAlkalosis(){
-    const d = lastAnalysis ? lastAnalysis.d : collect();
-    const weight = num('alkWeight');
-    ABG.Alkalosis.render($('alkOut'), { hco3:d.hco3, cl:d.cl, ph:d.ph, uCl:d.uCl, weight });
   }
 
   function runVentSim(){
@@ -104,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   $('nephroBtn').addEventListener('click', runNephro);
-  $('alkBtn').addEventListener('click', runAlkalosis);
   $('ventSimBtn').addEventListener('click', runVentSim);
   $('printBtn').addEventListener('click', () => ABG.Export.printReport());
 

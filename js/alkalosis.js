@@ -13,20 +13,10 @@ ABG.Alkalosis = (function(){
     return {label:'Indeterminate (urine Cl⁻ ≈ 20 mEq/L)', detail:'Borderline value — repeat once any diuretic effect has dissipated.'};
   }
 
-  function collect(){
-    const num = id => { const el=document.getElementById(id); if(!el) return null; const v=parseFloat(el.value); return isNaN(v)?null:v; };
-    return { weight: num('alkWeight') };
-  }
-
   function render(container, {hco3, cl, ph, uCl, weight}){
     const rows=[];
     const row=(label,value,unit,note)=>rows.push(
       `<div class="step"><div class="h">${label}</div><div class="b"><span class="val">${value}</span>${unit?(' '+unit):''}${note?`<div class="why">${note}</div>`:''}</div></div>`);
-
-    if(hco3==null || hco3<=24){
-      container.innerHTML = `<p class="placeholder">Enter an ABG with HCO₃⁻ &gt; 24 (a metabolic alkalosis) and analyze first — this panel calculates saline/chloride and HCl dosing per Marino Ch.33.</p>`;
-      return;
-    }
 
     const cls = classifyByUCl(uCl);
     if(cls) row('Classification (Table 33.1)', cls.label, '', cls.detail);
@@ -42,7 +32,7 @@ ABG.Alkalosis = (function(){
         row('Chloride deficit', '0', 'mEq', `Plasma Cl⁻ (${f1(cl)}) is already ≥ 100 mEq/L — no deficit by this formula.`);
       }
     } else {
-      row('Chloride deficit / saline volume', 'Not calculated', '', 'Enter weight (kg) below and ensure plasma Cl⁻ is entered in the ABG form.');
+      row('Chloride deficit / saline volume', 'Not calculated', '', 'Enter weight (kg) in the Patient section above and ensure plasma Cl⁻ is entered in the ABG form.');
     }
 
     const severe = (hco3>50) || (ph!=null && ph>7.55);
@@ -54,7 +44,7 @@ ABG.Alkalosis = (function(){
           `HCO₃⁻ ${f1(hco3)}${ph!=null?` / pH ${ph.toFixed(2)}`:''} exceeds the threshold for HCl infusion (HCO₃⁻ &gt; 50 or pH &gt; 7.55) — Eq. 33.4: 0.5 × ${f1(weight)} kg × (${f1(hco3)} − 24).`);
         row('0.1N HCl volume', f1(hclVol), 'L', `H⁺ deficit ÷ 100 mEq/L (0.1N HCl = 100 mL of 1N HCl in 900 mL saline/water). Infuse via a large central vein at ≤0.2 mEq/kg/hr; stop once pH falls to an acceptable level (e.g. &lt;7.5) — the full deficit need not be replaced. Extravasation causes tissue necrosis.`);
       } else {
-        row('<span class="fa">Severe alkalosis</span> (HCO₃⁻ &gt; 50 or pH &gt; 7.55)', 'HCl infusion may be indicated', '', 'Enter weight (kg) below to calculate the H⁺ deficit and required 0.1N HCl volume (Eq. 33.4).');
+        row('<span class="fa">Severe alkalosis</span> (HCO₃⁻ &gt; 50 or pH &gt; 7.55)', 'HCl infusion may be indicated', '', 'Enter weight (kg) in the Patient section above to calculate the H⁺ deficit and required 0.1N HCl volume (Eq. 33.4).');
       }
     }
 
@@ -64,5 +54,5 @@ ABG.Alkalosis = (function(){
     container.innerHTML = rows.join('');
   }
 
-  return { classifyByUCl, collect, render };
+  return { classifyByUCl, render };
 })();

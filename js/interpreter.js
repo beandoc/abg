@@ -24,7 +24,7 @@ ABG.Interpreter = (function(){
       return {invalid:true, msg:`The pH, pCO₂ and HCO₃⁻ are internally inconsistent — the Henderson equation predicts [H⁺] ${f1(Hcalc)} (pH ${phFromHcalc.toFixed(2)}) but the entered pH implies [H⁺] ${f1(Hmeas)}, a ${pctDiff.toFixed(0)}% mismatch. Per the textbook method, repeat the electrolytes and ABG a few minutes apart before interpreting — this points to a pre-analytical or transcription error, not a real disorder.`};
     }
 
-    let primary;
+    let primary, forcedMixed=null;
     if(ph<7.35) primary = hco3<N_HCO3?'Metabolic acidosis':(pco2>N_PCO2?'Respiratory acidosis':'Acidemia (indeterminate)');
     else if(ph>7.45) primary = hco3>N_HCO3?'Metabolic alkalosis':(pco2<N_PCO2?'Respiratory alkalosis':'Alkalemia (indeterminate)');
     else {
@@ -32,6 +32,12 @@ ABG.Interpreter = (function(){
       else if(pco2>N_PCO2 && ph<7.40) primary='Respiratory acidosis';
       else if(hco3>N_HCO3 && ph>7.40) primary='Metabolic alkalosis';
       else if(pco2<N_PCO2 && ph>7.40) primary='Respiratory alkalosis';
+      // Stage I, Rule 2 (Marino Ch.31): pH is normal but PaCO2/HCO3 is not — compensation
+      // never fully normalizes pH, so this can only be a mixed disorder, never a simple one.
+      else if(pco2>44){ primary='Respiratory acidosis'; forcedMixed='Metabolic alkalosis'; }
+      else if(pco2<36){ primary='Respiratory alkalosis'; forcedMixed='Metabolic acidosis'; }
+      else if(hco3>26){ primary='Metabolic alkalosis'; forcedMixed='Respiratory acidosis'; }
+      else if(hco3<22){ primary='Metabolic acidosis'; forcedMixed='Respiratory alkalosis'; }
       else primary='Normal pH — inspect AG and compensation';
     }
     if(primary.includes('acidosis')||primary.includes('Acidemia')) dxClass='acid';
@@ -116,6 +122,12 @@ ABG.Interpreter = (function(){
       }
     }
     S('Step 6 · Expected compensation & mixed check', compLine);
+
+    if(forcedMixed && !disorders.some(x=>x.toLowerCase().includes(forcedMixed.toLowerCase()))){
+      disorders.push(forcedMixed);
+      S('Step 6b · Normal pH with a deranged PaCO₂/HCO₃⁻',
+        `pH ${ph.toFixed(2)} is within the normal range despite an abnormal ${primary.includes('Respiratory')?'PaCO₂':'HCO₃⁻'} — compensation limits but never fully normalizes pH (Marino Ch.31), so a normal pH here proves a second, offsetting disorder: <b>${forcedMixed}</b>.`);
+    }
 
     if(highAG && primary==='Metabolic acidosis'){
       const {dAG,dHCO3,ratio}=C.deltaRatio(cAG,hco3,N_AG,N_HCO3);
@@ -207,10 +219,10 @@ ABG.Interpreter = (function(){
       R.push(['k','<b>Metabolic alkalosis</b> — assess volume and chloride status. Pathophysiology: HCO₃⁻ gain or H⁺/Cl⁻ loss, sustained by volume/chloride/potassium depletion.']);
       const uCl = r.uCl;
       if(uCl!=null) R.push(['', uCl<20
-        ? `Urine Cl⁻ ${f1(uCl)} mEq/L (&lt;20) → <b>chloride-sensitive</b> (vomiting, NG suction, diuretic after-effect, laxative abuse) → replace with isotonic saline + KCl; see “Metabolic alkalosis management” below for the dosing calculation.`
+        ? `Urine Cl⁻ ${f1(uCl)} mEq/L (&lt;20) → <b>chloride-sensitive</b> (vomiting, NG suction, diuretic after-effect, laxative abuse) → replace with isotonic saline + KCl; see the dosing calculation below.`
         : `Urine Cl⁻ ${f1(uCl)} mEq/L (&gt;20) → <b>chloride-resistant</b> (primary hyperaldosteronism, exogenous mineralocorticoid, licorice) → saline will not correct this; treat the underlying cause instead.`]);
       else R.push(['','Check urine Cl⁻: &lt; 20 = chloride-sensitive (vomiting, NG suction, diuretics) → normal saline + KCl; &gt; 20 = chloride-resistant (mineralocorticoid excess) → treat the cause, do not volume-load.']);
-      if(r.hco3>50 || r.ph>7.55) R.push(['a',`<span class="fa">Severe alkalosis</span> (HCO₃⁻ ${f1(r.hco3)}${r.hco3>50?' &gt;50':''}${r.ph>7.55?`, pH ${r.ph.toFixed(2)} &gt;7.55`:''}) — consider an HCl infusion if K⁺/acetazolamide are insufficient; see the dosing panel below. Reserve for refractory severe cases and infuse via a large central vein.`]);
+      if(r.hco3>50 || r.ph>7.55) R.push(['a',`<span class="fa">Severe alkalosis</span> (HCO₃⁻ ${f1(r.hco3)}${r.hco3>50?' &gt;50':''}${r.ph>7.55?`, pH ${r.ph.toFixed(2)} &gt;7.55`:''}) — consider an HCl infusion if K⁺/acetazolamide are insufficient; see the dosing calculation below. Reserve for refractory severe cases and infuse via a large central vein.`]);
       R.push(['','Expanded-volume states (heart failure, cirrhosis, cor pulmonale) where saline is counterproductive can be treated with acetazolamide 250–375 mg IV/PO instead. Check magnesium before/while replacing K⁺ — hypomagnesemia can make diuretic-induced hypokalemia refractory to K⁺ alone.']);
     }
     if(r.agState==='low') R.push(['','Low anion gap is abnormal — check albumin first, then consider paraproteinaemia (myeloma), lithium, or severe hypercalcaemia.']);

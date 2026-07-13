@@ -21,6 +21,7 @@
       <div class="fld"><label for="patientAge">Age</label><input type="number" id="patientAge" step="1" placeholder="years"></div>
       <div class="fld"><label for="patientSex">Sex</label>
         <select id="patientSex"><option value="">—</option><option value="M">Male</option><option value="F">Female</option></select></div>
+      <div class="fld"><label for="patientWeight">Weight (kg)</label><input type="number" id="patientWeight" step="0.1" placeholder="optional — sharpens dosing calcs"></div>
     </div>
   </details>
 
@@ -169,16 +170,6 @@
     <button type="button" id="nephroBtn" class="go">Calculate nephrology panel</button>
   </div>
   <div id="nephroOut" style="margin-top:14px"><p class="placeholder">Enter nephrology labs above and calculate. Uses Na⁺/K⁺/Cl⁻/albumin/lactate/pH/HCO₃⁻/glucose/BUN already entered in the ABG form, plus the fields here.</p></div>
-
-  <hr>
-  <h3>Metabolic alkalosis management <span style="font-weight:400;font-size:.8rem;color:var(--muted)">— chloride/saline &amp; HCl dosing (Marino Ch.33)</span></h3>
-  <div class="grid">
-    <div class="fld"><label for="alkWeight">Weight (kg)</label><input type="number" id="alkWeight" step="1" placeholder="lean body weight"></div>
-  </div>
-  <div class="btns">
-    <button type="button" id="alkBtn" class="go">Calculate alkalosis therapy</button>
-  </div>
-  <div id="alkOut" style="margin-top:14px"><p class="placeholder">Analyze an ABG with an elevated HCO₃⁻ first. Uses HCO₃⁻/Cl⁻/pH from the ABG form and urine Cl⁻ from “Additional labs”, plus weight entered here.</p></div>
 
   <hr>
   <h3>Reference tables <span style="font-weight:400;font-size:.8rem;color:var(--muted)">— Marino, <i>The ICU Book</i> 5E, Ch.31 "Acid-Base Analysis"</span></h3>
