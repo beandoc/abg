@@ -1,0 +1,74 @@
+{
+  "normalBox": {"phMin": 7.35, "phMax": 7.45, "hco3Min": 22, "hco3Max": 26},
+
+  "regions": [
+    {
+      "id": "metAcid",
+      "label": "Metabolic acidosis (Winter's)",
+      "color": "rgba(178,58,72,0.10)",
+      "line": "rgba(178,58,72,0.5)",
+      "axis": "hco3",
+      "domain": [4, 24],
+      "slope": 1.5,
+      "intercept": 8,
+      "tolerance": 2
+    },
+    {
+      "id": "metAlk",
+      "label": "Metabolic alkalosis",
+      "color": "rgba(47,107,79,0.10)",
+      "line": "rgba(47,107,79,0.5)",
+      "axis": "hco3",
+      "domain": [24, 48],
+      "slope": 0.7,
+      "intercept": 23.2,
+      "tolerance": 2
+    },
+    {
+      "id": "respAcidAcute",
+      "label": "Acute respiratory acidosis",
+      "color": "rgba(178,58,72,0.07)",
+      "line": "rgba(178,58,72,0.4)",
+      "axis": "pco2",
+      "domain": [40, 100],
+      "slope": 0.1,
+      "intercept": 20,
+      "tolerance": 3
+    },
+    {
+      "id": "respAcidChronic",
+      "label": "Chronic respiratory acidosis",
+      "color": "rgba(178,58,72,0.05)",
+      "line": "rgba(178,58,72,0.35)",
+      "axis": "pco2",
+      "domain": [40, 100],
+      "slope": 0.4,
+      "intercept": 8,
+      "tolerance": 4
+    },
+    {
+      "id": "respAlkAcute",
+      "label": "Acute respiratory alkalosis",
+      "color": "rgba(47,107,79,0.07)",
+      "line": "rgba(47,107,79,0.4)",
+      "axis": "pco2",
+      "domain": [15, 40],
+      "slope": 0.2,
+      "intercept": 16,
+      "tolerance": 2
+    },
+    {
+      "id": "respAlkChronic",
+      "label": "Chronic respiratory alkalosis",
+      "color": "rgba(47,107,79,0.05)",
+      "line": "rgba(47,107,79,0.35)",
+      "axis": "pco2",
+      "domain": [15, 40],
+      "slope": 0.4,
+      "intercept": 8,
+      "tolerance": 4
+    }
+  ],
+
+  "isobars": [20, 30, 40, 60, 80]
+}

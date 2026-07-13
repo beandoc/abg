@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acid–Base &amp; Nephrology Analyzer</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+</head>
+<body>
+<main>
+  <h1>Acid–Base &amp; Nephrology Analyzer</h1>
+  <p class="sub">Stepwise ABG interpretation with mixed-disorder detection, a scientific Davenport diagram, serial trend tracking, and a nephrology calculator suite.</p>
+
+  <details>
+    <summary>Patient</summary>
+    <div class="grid">
+      <div class="fld"><label for="patientName">Name</label><input type="text" id="patientName" placeholder="optional"></div>
+      <div class="fld"><label for="patientId">MRN / ID</label><input type="text" id="patientId" placeholder="optional"></div>
+      <div class="fld"><label for="patientBed">Bed / location</label><input type="text" id="patientBed" placeholder="optional"></div>
+      <div class="fld"><label for="patientAge">Age</label><input type="number" id="patientAge" step="1" placeholder="years"></div>
+      <div class="fld"><label for="patientSex">Sex</label>
+        <select id="patientSex"><option value="">—</option><option value="M">Male</option><option value="F">Female</option></select></div>
+    </div>
+  </details>
+
+  <form id="f">
+    <fieldset>
+      <div class="grid">
+        <div class="fld"><label for="ph">pH</label><input type="number" id="ph" step="0.01" placeholder="7.35–7.45"></div>
+        <div class="fld"><label for="pco2">pCO₂ (mmHg)</label><input type="number" id="pco2" step="0.1" placeholder="35–45"></div>
+        <div class="fld"><label for="hco3">HCO₃⁻ (mEq/L)</label><input type="number" id="hco3" step="0.1" placeholder="22–26"></div>
+        <div class="fld"><label for="na">Na⁺</label><input type="number" id="na" step="1" placeholder="135–145"></div>
+        <div class="fld"><label for="k">K⁺</label><input type="number" id="k" step="0.1" placeholder="3.5–5.0"></div>
+        <div class="fld"><label for="cl">Cl⁻</label><input type="number" id="cl" step="1" placeholder="98–106"></div>
+        <div class="fld"><label for="lactate">Lactate (mmol/L)</label><input type="number" id="lactate" step="0.1" placeholder="< 2.0"></div>
+        <div class="fld"><label for="albumin">Albumin (g/dL)</label><input type="number" id="albumin" step="0.1" placeholder="3.5–5.0"></div>
+      </div>
+    </fieldset>
+
+    <details>
+      <summary>Additional labs (osmolal / urine gap)</summary>
+      <div class="grid">
+        <div class="fld"><label for="bun">BUN (mg/dL)</label><input type="number" id="bun" step="1"></div>
+        <div class="fld"><label for="glucose">Glucose (mg/dL)</label><input type="number" id="glucose" step="1"></div>
+        <div class="fld"><label for="measuredOsm">Meas. Osm</label><input type="number" id="measuredOsm" step="1"></div>
+        <div class="fld"><label for="ethanol">Ethanol (mg/dL)</label><input type="number" id="ethanol" step="1"></div>
+        <div class="fld"><label for="uNa">Urine Na⁺</label><input type="number" id="uNa" step="1"></div>
+        <div class="fld"><label for="uK">Urine K⁺</label><input type="number" id="uK" step="1"></div>
+        <div class="fld"><label for="uCl">Urine Cl⁻</label><input type="number" id="uCl" step="1"></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>Ventilator / oxygenation</summary>
+      <div class="grid">
+        <div class="fld"><label for="ventMode">Mode</label>
+          <select id="ventMode"><option value="Not Set">Not set</option>
+            <option>AC-VC</option><option>AC-PC</option><option>SIMV-VC</option>
+            <option>SIMV-PC</option><option>PS/CPAP</option><option>Spontaneous</option></select></div>
+        <div class="fld"><label for="fio2">FiO₂ (%)</label><input type="number" id="fio2" step="1" min="21" max="100" placeholder="21"></div>
+        <div class="fld"><label for="pao2">PaO₂ (mmHg)</label><input type="number" id="pao2" step="1" placeholder="A–a gradient"></div>
+        <div class="fld"><label for="weight">IBW (kg)</label><input type="number" id="weight" step="1" placeholder="for mL/kg"></div>
+        <div class="fld"><label for="tidalVolume">Vt (mL)</label><input type="number" id="tidalVolume" step="10"></div>
+        <div class="fld"><label for="respRate">RR (bpm)</label><input type="number" id="respRate" step="1"></div>
+        <div class="fld"><label for="peep">PEEP (cmH₂O)</label><input type="number" id="peep" step="1"></div>
+      </div>
+    </details>
+
+    <div class="btns">
+      <button type="submit" class="go">Analyze</button>
+      <button type="button" id="logBtn" class="log">Analyze &amp; log to trend</button>
+      <button type="button" id="printBtn" class="exp">Print report</button>
+      <button type="reset" class="rst">Reset</button>
+    </div>
+  </form>
+
+  <hr>
+
+  <div class="cols">
+    <div>
+      <h3>Interpretation</h3>
+      <div id="dx"></div>
+      <div id="out"><p class="placeholder">Enter values and analyze.</p></div>
+    </div>
+    <div>
+      <h3>Davenport diagram</h3>
+      <div id="davenport"></div>
+    </div>
+  </div>
+
+  <hr>
+  <h3>Recommendations &amp; likely pathophysiology</h3>
+  <div id="rec"><p class="placeholder">Analyze to generate guidance.</p></div>
+
+  <hr>
+  <h3>Serial ABG trend <span style="font-weight:400;font-size:.8rem;color:var(--muted)">— log successive gases to track the trajectory</span></h3>
+  <div id="trend"><p class="placeholder">No logged gases yet. Use “Analyze &amp; log to trend”.</p></div>
+
+  <hr>
+  <h3>Nephrology calculators</h3>
+  <details>
+    <summary>Renal function &amp; electrolyte corrections</summary>
+    <div class="subhead">Renal function</div>
+    <div class="grid">
+      <div class="fld"><label for="nAge">Age (yrs)</label><input type="number" id="nAge" step="1"></div>
+      <div class="fld"><label for="nSex">Sex</label>
+        <select id="nSex"><option value="">—</option><option value="M">Male</option><option value="F">Female</option></select></div>
+      <div class="fld"><label for="nCreatinine">Creatinine (mg/dL)</label><input type="number" id="nCreatinine" step="0.1"></div>
+    </div>
+    <div class="subhead">Electrolyte corrections</div>
+    <div class="grid">
+      <div class="fld"><label for="nCalcium">Total calcium (mg/dL)</label><input type="number" id="nCalcium" step="0.1"></div>
+      <div class="fld"><label for="nPhosphate">Phosphate (mg/dL)</label><input type="number" id="nPhosphate" step="0.1"></div>
+      <div class="fld"><label for="nMagnesium">Magnesium (mg/dL)</label><input type="number" id="nMagnesium" step="0.1"></div>
+    </div>
+  </details>
+
+  <details>
+    <summary>Urine studies</summary>
+    <div class="grid">
+      <div class="fld"><label for="nUCr">Urine creatinine (mg/dL)</label><input type="number" id="nUCr" step="1"></div>
+      <div class="fld"><label for="nUUrea">Urine urea (mg/dL)</label><input type="number" id="nUUrea" step="1"></div>
+      <div class="fld"><label for="nUPhos">Urine phosphate (mg/dL)</label><input type="number" id="nUPhos" step="0.1"></div>
+      <div class="fld"><label for="nUOsm">Urine osmolality (measured)</label><input type="number" id="nUOsm" step="1"></div>
+      <div class="fld"><label for="nUVol">Urine volume (mL)</label><input type="number" id="nUVol" step="1"></div>
+      <div class="fld"><label for="nUTime">Collection time (hr)</label><input type="number" id="nUTime" step="0.5"></div>
+    </div>
+    <p class="placeholder" style="margin-top:8px">Urine Na⁺ / K⁺ are read from the “Additional labs” section above.</p>
+  </details>
+
+  <details>
+    <summary>Dialysis adequacy</summary>
+    <div class="grid">
+      <div class="fld"><label for="nPreBUN">Pre-HD BUN (mg/dL)</label><input type="number" id="nPreBUN" step="1"></div>
+      <div class="fld"><label for="nPostBUN">Post-HD BUN (mg/dL)</label><input type="number" id="nPostBUN" step="1"></div>
+      <div class="fld"><label for="nHdTime">Session length (hr)</label><input type="number" id="nHdTime" step="0.1"></div>
+      <div class="fld"><label for="nUfVolume">Ultrafiltration (L)</label><input type="number" id="nUfVolume" step="0.1"></div>
+      <div class="fld"><label for="nPostWeight">Post-HD weight (kg)</label><input type="number" id="nPostWeight" step="0.1"></div>
+      <div class="fld"><label for="nSessions">Sessions / week</label><input type="number" id="nSessions" step="1" value="3"></div>
+    </div>
+  </details>
+
+  <div class="btns">
+    <button type="button" id="nephroBtn" class="go">Calculate nephrology panel</button>
+  </div>
+  <div id="nephroOut" style="margin-top:14px"><p class="placeholder">Enter nephrology labs above and calculate. Uses Na⁺/K⁺/Cl⁻/albumin/lactate/pH/HCO₃⁻/glucose/BUN already entered in the ABG form, plus the fields here.</p></div>
+
+  <footer>Educational decision support based on a stepwise textbook method. Correlate clinically; not a substitute for judgement.</footer>
+</main>
+
+<script src="js/calculators.js"></script>
+<script src="js/interpreter.js"></script>
+<script src="js/davenport.js"></script>
+<script src="js/trend.js"></script>
+<script src="js/patient.js"></script>
+<script src="js/export.js"></script>
+<script src="js/nephro.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
