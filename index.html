@@ -1,993 +1,495 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acid-Base Calculator</title>
-    
-    <!-- 
-      This script tag loads the Chart.js library from a CDN.
-      It is required to draw the Davenport diagram.
-    -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-    <!-- 
-      CSS styles are placed directly inside the <style> tag in the <head>.
-    -->
-    <style>
-        /* Basic styling */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            line-height: 1.6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            /* Ensure it takes at least the full viewport height */
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-
-        main.calculator-container {
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            padding: 24px 32px;
-            max-width: 900px;
-            width: 100%;
-        }
-
-        h1 {
-            color: #005a9c;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        p {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #555;
-        }
-
-        hr {
-            border: none;
-            border-top: 1px solid #eee;
-            margin: 30px 0;
-        }
-
-        /* Form styling */
-        .input-grid {
-            display: grid;
-            /* Creates responsive columns: they will be at least 130px wide, 
-               and will wrap to the next line if there isn't enough space. */
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 20px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .input-group label {
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #333;
-        }
-
-        .input-group input {
-            padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        /* Style for the optional <details> summary */
-        details > summary {
-            cursor: pointer;
-            font-weight: 600;
-            color: #005a9c;
-            margin-top: 20px;
-            padding: 5px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-
-        details > summary:hover {
-            background-color: #f0f4f8;
-        }
-
-        details[open] > summary {
-            margin-bottom: 15px;
-        }
-
-        /* Make new <select> dropdowns match text inputs */
-        .input-group select {
-            padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            background-color: white; /* Ensure consistent background */
-        }
-
-        .input-group input:focus,
-        .input-group select:focus {
-            justify-content: center;
-            /* Allow buttons to wrap on small screens */
-            flex-wrap: wrap;
-        }
-
-        .button-group button {
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-
-        .btn-calculate {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .btn-calculate:hover {
-            background-color: #0056b3;
-        }
-
-        .btn-reset {
-            background-color: #f0f0f0;
-            color: #555;
-            border: 1px solid #ccc;
-        }
-
-        .btn-reset:hover {
-            background-color: #e0e0e0;
-        }
-
-        .button-group button:active {
-            transform: translateY(1px);
-        }
-
-        /* Results section */
-        .results-container {
-            display: grid;
-            /* Two-column layout on larger screens */
-            grid-template-columns: 1fr 1.5fr;
-            gap: 30px;
-            margin-top: 20px;
-        }
-
-        /* On smaller screens (<= 768px), stack the columns */
-        @media (max-width: 768px) {
-            .results-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .results-text h3, .results-chart h3, .recommendations-text h3 {
-            color: #005a9c;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 5px;
-            margin-bottom: 15px;
-        }
-
-        /* Styling for the results list */
-        #results-output ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-
-        #results-output li {
-            background-color: #f9f9f9;
-            border: 1px solid #eee;
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 6px;
-        }
-
-        #results-output li strong {
-            color: #005a9c;
-        }
-        
-        #results-output .error-message {
-            color: #D8000C; /* Red for errors */
-            background-color: #FFD2D2;
-            border: 1px solid #D8000C;
-            padding: 10px;
-            border-radius: 6px;
-        }
-
-        /* New styles for recommendation list */
-        .recommendations-text ul {
-            list-style-type: '👉'; /* Use an emoji or other marker */
-            padding-left: 20px;
-        }
-
-        .recommendations-text li {
-            padding: 8px;
-            margin-bottom: 8px;
-            border-radius: 6px;
-            background-color: #f0f4f8;
-            border-left: 4px solid #007bff;
-        }
-
-        /* Wrapper for the chart canvas to control its size */
-        .chart-wrapper {
-            position: relative;
-            /* Maintain aspect ratio for the chart */
-            height: 400px; 
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 0.85rem;
-            color: #888;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acid–Base Analyzer</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#16232e; --muted:#5b6b78; --line:#dbe3e8; --paper:#fff; --bg:#e9eef1;
+    --accent:#0d6a8c; --accent-dk:#084d66;
+    --acid:#b23a48; --acid-bg:#fae9eb; --alk:#2f6b4f; --alk-bg:#e6f1eb;
+    --warn:#8a5a00; --warn-bg:#faf0da; --up:#2f6b4f; --dn:#b23a48;
+    --mono:"SFMono-Regular",Consolas,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.55; margin:0; padding:22px;}
+  main{background:var(--paper); border-radius:10px; box-shadow:0 2px 16px rgba(20,40,60,.07);
+    max-width:1000px; margin:0 auto; padding:26px 32px; border:1px solid var(--line);}
+  h1{font-size:1.5rem; margin:0 0 3px; letter-spacing:-.01em;}
+  .sub{color:var(--muted); margin:0 0 20px; font-size:.92rem;}
+  hr{border:none; border-top:1px solid var(--line); margin:24px 0;}
+  fieldset{border:none; padding:0; margin:0;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:15px;}
+  .fld{display:flex; flex-direction:column;}
+  .fld label{font-weight:600; font-size:.8rem; margin-bottom:5px;}
+  .fld input,.fld select{padding:9px 10px; font-size:.95rem; border:1px solid #c3ced5;
+    border-radius:6px; background:#fff;}
+  .fld input:focus,.fld select:focus{outline:none; border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(13,106,140,.15);}
+  details{margin-top:15px;}
+  summary{cursor:pointer; font-weight:600; font-size:.88rem; color:var(--accent); padding:6px 0;}
+  details[open] summary{margin-bottom:12px;}
+  .btns{display:flex; gap:11px; margin-top:20px; flex-wrap:wrap;}
+  .btns button{padding:11px 24px; font-size:.94rem; font-weight:600; border-radius:6px;
+    cursor:pointer; border:1px solid transparent;}
+  .go{background:var(--accent); color:#fff;} .go:hover{background:var(--accent-dk);}
+  .rst{background:#fff; color:var(--muted); border:1px solid #c3ced5;} .rst:hover{background:#f2f5f6;}
+  .log{background:#eef4f2; color:var(--alk); border:1px solid #b8d4c6;} .log:hover{background:#e2eee8;}
+  .cols{display:grid; grid-template-columns:1fr 1.25fr; gap:28px; margin-top:6px;}
+  @media(max-width:780px){.cols{grid-template-columns:1fr;}}
+  h3{font-size:1rem; border-bottom:2px solid var(--line); padding-bottom:6px; margin:0 0 13px;}
+  .dx{font-size:1.05rem; font-weight:700; padding:12px 14px; border-radius:8px; margin-bottom:8px;
+    border-left:4px solid var(--muted); background:#f2f5f6;}
+  .dx.acid{border-color:var(--acid); background:var(--acid-bg);}
+  .dx.alk{border-color:var(--alk); background:var(--alk-bg);}
+  .dx.warn{border-color:var(--warn); background:var(--warn-bg);}
+  .dx small{display:block; font-weight:500; font-size:.82rem; color:var(--muted); margin-top:3px;}
+  .step{margin-bottom:12px;}
+  .step .h{font-weight:700; font-size:.82rem; color:var(--accent-dk); text-transform:uppercase;
+    letter-spacing:.03em; margin-bottom:4px;}
+  .step .b{font-size:.9rem;}
+  .step .b .val{font-family:var(--mono); font-weight:600;}
+  .step .b b{color:var(--accent-dk);}
+  .fa{color:var(--acid); font-weight:600;} .fk{color:var(--alk); font-weight:600;}
+  .why{background:#f7f9fa; border:1px solid var(--line); border-left:3px solid var(--accent);
+    padding:9px 11px; border-radius:5px; font-size:.86rem; color:#37474f; margin-top:5px;}
+  .err{color:var(--acid); background:var(--acid-bg); border:1px solid var(--acid);
+    padding:11px; border-radius:6px; font-size:.9rem;}
+  .chart-wrap{position:relative; height:360px;}
+  ul.rec{list-style:none; padding:0; margin:0;}
+  ul.rec li{padding:10px 12px; margin-bottom:8px; border-radius:6px; background:#f2f5f6;
+    border-left:4px solid var(--accent); font-size:.89rem;}
+  ul.rec li.a{border-color:var(--acid); background:var(--acid-bg);}
+  ul.rec li.k{border-color:var(--alk); background:var(--alk-bg);}
+  .placeholder{color:var(--muted); font-size:.9rem;}
+  .trend{margin-top:8px; overflow-x:auto;}
+  table{border-collapse:collapse; width:100%; font-size:.84rem;}
+  th,td{padding:6px 8px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap;}
+  th{color:var(--muted); font-weight:600; font-size:.76rem; text-transform:uppercase;}
+  td:first-child,th:first-child{text-align:left;}
+  .arrow{font-weight:700;} .arrow.up{color:var(--up);} .arrow.dn{color:var(--dn);}
+  .verdict{padding:10px 13px; border-radius:7px; font-weight:600; font-size:.92rem; margin-top:10px;}
+  .verdict.improving{background:var(--alk-bg); color:var(--alk); border-left:4px solid var(--alk);}
+  .verdict.deteriorating{background:var(--acid-bg); color:var(--acid); border-left:4px solid var(--acid);}
+  .verdict.mixed{background:var(--warn-bg); color:var(--warn); border-left:4px solid var(--warn);}
+  footer{text-align:center; margin-top:24px; font-size:.8rem; color:var(--muted);}
+</style>
 </head>
 <body>
-
-    <!-- 
-      This is the main HTML structure of the application.
-    -->
-    <main class="calculator-container">
-        <h1>🩺 Acid-Base Calculator</h1>
-        <p>Analyze arterial blood gas results with Davenport diagram visualization.</p>
-
-        <!-- The form for user input -->
-        <form id="abg-form">
-            <div class="input-grid">
-                <!-- pH -->
-                <div class="input-group">
-                    <label for="ph">pH</label>
-                    <input type="number" id="ph" step="0.01" min="6.8" max="7.8" placeholder="7.35-7.45">
-                </div>
-
-                <!-- pCO₂ -->
-                <div class="input-group">
-                    <label for="pco2">pCO₂ (mmHg)</label>
-                    <input type="number" id="pco2" step="0.1" min="0" placeholder="35-45">
-                </div>
-
-                <!-- HCO₃⁻ -->
-                <div class="input-group">
-                    <label for="hco3">HCO₃⁻ (mEq/L)</label>
-                    <input type="number" id="hco3" step="0.1" min="0" placeholder="22-26">
-                </div>
-
-                <!-- Na⁺ -->
-                <div class="input-group">
-                    <label for="na">Na⁺ (mEq/L)</label>
-                    <input type="number" id="na" step="1" min="0" placeholder="135-145">
-                </div>
-
-                <!-- Cl⁻ -->
-                <div class="input-group">
-                    <label for="cl">Cl⁻ (mEq/L)</label>
-                    <input type="number" id="cl" step="1" min="0" placeholder="98-106">
-                </div>
-            </div>
-
-            <!-- New Section for Optional Labs -->
-            <details>
-                <summary>Optional Labs for Gap Analysis (click to expand)</summary>
-                
-                <div class="input-grid">
-                    <!-- Lactate -->
-                    <div class="input-group">
-                        <label for="lactate">Lactate (mEq/L)</label>
-                        <input type="number" id="lactate" step="0.1" min="0" placeholder="< 2.0">
-                    </div>
-
-                    <!-- Albumin (NEW) -->
-                    <div class="input-group">
-                        <label for="albumin">Albumin (g/dL)</label>
-                        <input type="number" id="albumin" step="0.1" min="0" placeholder="3.5-5.0">
-                    </div>
-
-                    <!-- BUN -->
-                    <div class="input-group">
-                        <label for="bun">BUN (mg/dL)</label>
-                        <input type="number" id="bun" step="1" min="0" placeholder="7-20">
-                    </div>
-
-                    <!-- Glucose -->
-                    <div class="input-group">
-                        <label for="glucose">Glucose (mg/dL)</label>
-                        <input type="number" id="glucose" step="1" min="0" placeholder="70-100">
-                    </div>
-
-                    <!-- Measured Osmolality -->
-                    <div class="input-group">
-                        <label for="measuredOsm">Meas. Osmolality</label>
-                        <input type="number" id="measuredOsm" step="1" min="0" placeholder="275-295">
-                    </div>
-
-                    <!-- Urine Na+ -->
-                    <div class="input-group">
-                        <label for="uNa">Urine Na⁺ (mEq/L)</label>
-                        <input type="number" id="uNa" step="1" min="0" placeholder="~20">
-                    </div>
-
-                    <!-- Urine K+ -->
-                    <div class="input-group">
-                        <label for="uK">Urine K⁺ (mEq/L)</label>
-                        <input type="number" id="uK" step="1" min="0" placeholder="~25-100">
-                    </div>
-
-                    <!-- Urine Cl- -->
-                    <div class="input-group">
-                        <label for="uCl">Urine Cl⁻ (mEq/L)</label>
-                        <input type="number" id="uCl" step="1" min="0" placeholder="~110-250">
-                    </div>
-                </div>
-            </details>
-            <!-- End of Optional Labs Section -->
-
-            <!-- New Section for Ventilator Parameters -->
-            <details>
-                <summary>Ventilator Parameters (Optional)</summary>
-                
-                <div class="input-grid">
-                    <!-- Ventilator Mode -->
-                    <div class="input-group">
-                        <label for="ventMode">Mode</label>
-                        <select id="ventMode">
-                            <option value="Not Set">Not Set</option>
-                            <option value="AC-VC">AC-VC</option>
-                            <option value="AC-PC">AC-PC</option>
-                            <option value="SIMV-VC">SIMV-VC</option>
-                            <option value="SIMV-PC">SIMV-PC</option>
-                            <option value="PS/CPAP">PS/CPAP</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-
-                    <!-- FiO₂ -->
-                    <div class="input-group">
-                        <label for="fio2">FiO₂ (%)</label>
-                        <input type="number" id="fio2" step="1" min="21" max="100" placeholder="21-100">
-                    </div>
-
-                    <!-- Tidal Volume (Vt) -->
-                    <div class="input-group">
-                        <label for="tidalVolume">Tidal Volume (mL)</label>
-                        <input type="number" id="tidalVolume" step="10" min="0" placeholder="e.g., 400">
-                    </div>
-
-                    <!-- Respiratory Rate (RR) -->
-                    <div class="input-group">
-                        <label for="respRate">Resp. Rate (bpm)</label>
-                        <input type="number" id="respRate" step="1" min="0" placeholder="e.g., 16">
-                    </div>
-
-                    <!-- PEEP -->
-                    <div class="input-group">
-                        <label for="peep">PEEP (cmH₂O)</label>
-                        <input type="number" id="peep" step="1" min="0" placeholder="e.g., 5">
-                    </div>
-                </div>
-            </details>
-            <!-- End of Ventilator Section -->
-
-
-            <div class="button-group">
-                <button type="submit" class="btn-calculate">Calculate</button>
-                <button type="reset" class="btn-reset">Reset</button>
-            </div>
-        </form>
-
-        <hr>
-
-        <!-- Container for the results and the chart -->
-        <div class="results-container">
-            <div class="results-text">
-                <h3>Results</h3>
-                <div id="results-output">
-                    <p>Enter values and click Calculate to see results.</p>
-                </div>
-            </div>
-            
-            <div class="results-chart">
-                <h3>Davenport Diagram</h3>
-                <div class="chart-wrapper">
-                    <!-- The canvas element where Chart.js will draw the diagram -->
-                    <canvas id="davenportChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- New Recommendations Section -->
-        <hr>
-        <div class="recommendations-text">
-            <h3>Recommendations</h3>
-            <div id="recommendations-output">
-                <p>Calculations must be run to generate recommendations.</p>
-            </div>
-        </div>
-        <!-- End of Recommendations Section -->
-
-        <footer>
-            <p>This calculator is for educational purposes only. Always consult with a healthcare professional for medical decisions.</p>
-        </footer>
-
-    </main>
-
-    <!-- 
-      All JavaScript code is placed inside this <script> tag.
-      It's at the end of the <body> so that all HTML elements
-      are loaded before the script tries to find them.
-    -->
-    <script>
-        // Wait for the DOM to be fully loaded before running the script
-        document.addEventListener('DOMContentLoaded', () => {
-
-            // Get references to our HTML elements
-            const form = document.getElementById('abg-form');
-            const resultsOutput = document.getElementById('results-output');
-            const recommendationsOutput = document.getElementById('recommendations-output'); // New element
-            const ctx = document.getElementById('davenportChart').getContext('2d');
-
-            // This variable will hold our chart instance
-            let davenportChart = null;
-
-            // --- Helper function to generate pCO₂ isobars ---
-            /**
-             * Calculates the data points for a pCO₂ isobar using the
-             * Henderson-Hasselbalch equation: HCO₃⁻ = 0.03 * pCO₂ * 10^(pH - 6.1)
-             * @param {number} pco2 - The pCO₂ level for this isobar.
-             * @returns {Array<Object>} An array of {x, y} points for the chart.
-             */
-            function generateIsobar(pco2) {
-                const dataPoints = [];
-                // Generate points across a range of pH values
-                for (let pH = 7.0; pH <= 7.8; pH += 0.02) {
-                    // Henderson-Hasselbalch equation rearranged
-                    const hco3 = 0.03 * pco2 * Math.pow(10, (pH - 6.1));
-                    dataPoints.push({ x: pH, y: hco3 });
-                }
-                return dataPoints;
-            }
-
-            // --- Main function to draw the diagram ---
-            /**
-             * Draws or updates the Davenport diagram.
-             * @param {Object | null} patientData - An object {ph, hco3, pco2} or null.
-             */
-            function drawDavenportDiagram(patientData = null) {
-                // If a chart already exists, destroy it before drawing a new one
-                if (davenportChart) {
-                    davenportChart.destroy();
-                }
-
-                const datasets = [];
-
-                // 1. Add the "Normal" reference box
-                datasets.push({
-                    label: 'Normal Range (pH 7.35-7.45, HCO₃⁻ 22-26)',
-                    data: [
-                        { x: 7.35, y: 22 },
-                        { x: 7.45, y: 22 },
-                        { x: 7.45, y: 26 },
-                        { x: 7.35, y: 26 },
-                        { x: 7.35, y: 22 } // Close the box
-                    ],
-                    borderColor: 'rgba(0, 180, 0, 0.5)',
-                    backgroundColor: 'rgba(0, 180, 0, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    type: 'line',
-                    pointRadius: 0,
-                    showLine: true,
-                });
-
-                // 2. Add standard pCO₂ isobars
-                const standardPco2Levels = [20, 30, 40, 60, 80];
-                standardPco2Levels.forEach(pco2 => {
-                    datasets.push({
-                        label: `pCO₂ = ${pco2} mmHg`,
-                        data: generateIsobar(pco2),
-                        type: 'line',
-                        borderColor: 'rgba(150, 150, 150, 0.5)',
-                        borderWidth: 1.5,
-                        pointRadius: 0,
-                        borderDash: [5, 5], // Make them dashed lines
-                        showLine: true,
-                        fill: false
-                    });
-                });
-
-                // 3. Add patient data if it exists
-                if (patientData) {
-                    // Add the patient's specific pCO₂ isobar
-                    datasets.push({
-                        label: `Patient pCO₂ (${patientData.pco2.toFixed(1)})`,
-                        data: generateIsobar(patientData.pco2),
-                        type: 'line',
-                        borderColor: 'rgba(0, 123, 255, 0.8)', // Blue
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        showLine: true,
-                        fill: false
-                    });
-
-                    // Add the patient's data point
-                    datasets.push({
-                        label: 'Patient Point',
-                        data: [{ x: patientData.ph, y: patientData.hco3 }],
-                        backgroundColor: 'rgba(255, 0, 0, 1)', // Red
-                        type: 'scatter',
-                        pointRadius: 7,
-                        pointHoverRadius: 9,
-                    });
-                }
-
-                // 4. Create the chart instance
-                davenportChart = new Chart(ctx, {
-                    type: 'scatter', // Main type is scatter, but we add line datasets
-                    data: {
-                        datasets: datasets
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                type: 'linear',
-                                position: 'bottom',
-                                title: {
-                                    display: true,
-                                    text: 'pH',
-                                    font: { size: 14, weight: 'bold' }
-                                },
-                                min: 7.0,
-                                max: 7.8
-                            },
-                            y: {
-                                type: 'linear',
-                                title: {
-                                    display: true,
-                                    text: 'HCO₃⁻ (mEq/L)',
-                                    font: { size: 14, weight: 'bold' }
-                                },
-                                min: 10,
-                                max: 50
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    // Filter out the "Normal Range" label from the legend
-                                    // to keep it clean.
-                                    filter: (legendItem) => legendItem.text !== 'Normal Range (pH 7.35-7.45, HCO₃⁻ 22-26)'
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        if (context.dataset.label === 'Patient Point') {
-                                            return `Patient: (pH: ${context.parsed.x}, HCO₃⁻: ${context.parsed.y.toFixed(1)})`;
-                                        }
-                                        // Tooltip for other lines (isobars)
-                                        return `${context.dataset.label}: (pH: ${context.parsed.x}, HCO₃⁻: ${context.parsed.y.toFixed(1)})`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-
-            // --- Event Handler for Calculation ---
-            function handleCalculate(event) {
-                // Prevent the form from submitting and reloading the page
-                event.preventDefault();
-
-                // 1. Get and parse all input values
-                const ph = parseFloat(document.getElementById('ph').value);
-                const pco2 = parseFloat(document.getElementById('pco2').value);
-                const hco3 = parseFloat(document.getElementById('hco3').value);
-                const na = parseFloat(document.getElementById('na').value);
-                const cl = parseFloat(document.getElementById('cl').value);
-
-                // Get new optional values
-                const lactate = parseFloat(document.getElementById('lactate').value);
-                const albumin = parseFloat(document.getElementById('albumin').value); // NEW
-                const bun = parseFloat(document.getElementById('bun').value);
-                const glucose = parseFloat(document.getElementById('glucose').value);
-                const measuredOsm = parseFloat(document.getElementById('measuredOsm').value);
-                const uNa = parseFloat(document.getElementById('uNa').value);
-                const uK = parseFloat(document.getElementById('uK').value);
-                const uCl = parseFloat(document.getElementById('uCl').value);
-
-                // Get new ventilator parameters
-                const ventParams = {
-                    mode: document.getElementById('ventMode').value,
-                    fio2: parseFloat(document.getElementById('fio2').value),
-                    tidalVolume: parseFloat(document.getElementById('tidalVolume').value),
-                    respRate: parseFloat(document.getElementById('respRate').value),
-                    peep: parseFloat(document.getElementById('peep').value)
-                };
-
-                // 2. Validate essential inputs (pH, pCO2, HCO3 are needed for logic and chart)
-                if (isNaN(ph) || isNaN(pco2) || isNaN(hco3)) {
-                    resultsOutput.innerHTML = `<p class="error-message">Please enter valid values for pH, pCO₂, and HCO₃⁻ to calculate.</p>`;
-                    // Draw a blank chart if it's not already drawn
-                    if (!davenportChart) {
-                        drawDavenportDiagram(null);
-                    }
-                    return;
-                }
-                
-                // 3. Check for physiologically impossible/invalid values
-                // Prevent divide-by-zero or log(0) in the H-H check
-                if (pco2 <= 0 || hco3 <= 0) {
-                     resultsOutput.innerHTML = `<p class="error-message">pCO₂ and HCO₃⁻ must be positive, non-zero values to perform calculations. Please check your inputs.</p>`;
-                     drawDavenportDiagram(null); // Clear chart
-                     return;
-                }
-
-                // Recalculate pH from pCO2 and HCO3 to check for consistency
-                const calculatedPh = 6.1 + Math.log10(hco3 / (0.03 * pco2));
-                // Allow a small tolerance for rounding
-                if (Math.abs(calculatedPh - ph) > 0.1) {
-                     resultsOutput.innerHTML = `<p class="error-message">The entered pH, pCO₂, and HCO₃⁻ values are not consistent according to the Henderson-Hasselbalch equation. Please check your inputs.</p>`;
-                     drawDavenportDiagram(null); // Clear chart
-                     return;
-                }
-
-
-                let interpretation = [];
-                let primaryDisorder = "Undetermined";
-                let isHAGMA = false; // High Anion Gap Metabolic Acidosis
-                let isNAGMA = false; // Non-Anion Gap Metabolic Acidosis
-
-                // 4. Calculate Anion Gap (if possible)
-                let ag = NaN;
-                let correctedAG = NaN; // NEW
-                if (!isNaN(na) && !isNaN(cl)) {
-                    ag = na - (cl + hco3);
-                    interpretation.push(`<li><strong>Anion Gap (AG):</strong> ${ag.toFixed(1)} mEq/L (Normal: 8-12)</li>`);
-
-                    // NEW: Albumin Correction
-                    if (!isNaN(albumin)) {
-                        const NORMAL_ALBUMIN = 4.0;
-                        correctedAG = ag + (2.5 * (NORMAL_ALBUMIN - albumin));
-                        interpretation.push(`<li><strong>Albumin-Corrected AG:</strong> ${correctedAG.toFixed(1)} mEq/L</li>`);
-                    } else {
-                        correctedAG = ag; // If no albumin, use the raw AG
-                        interpretation.push(`<li>Albumin not entered. AG correction not performed.</li>`);
-                    }
-                    
-                    if (correctedAG > 12) { // Use correctedAG for logic
-                        interpretation.push(`<li><span style="color: #D8000C;">High Anion Gap</span> (corrected) detected.</li>`);
-                        isHAGMA = true;
-                    }
-                } else {
-                    interpretation.push(`<li>Anion Gap not calculated (Na⁺ or Cl⁻ missing).</li>`);
-                }
-
-                // 5. Primary Disorder Logic
-                if (ph < 7.35) { // --- Acidosis ---
-                    if (pco2 > 45) {
-                        primaryDisorder = "Respiratory Acidosis";
-                    } else if (hco3 < 22) {
-                        primaryDisorder = "Metabolic Acidosis";
-                        if (!isHAGMA) { isNAGMA = true; } // Mark as NAGMA if AG is normal
-                    } else {
-                        primaryDisorder = "Mixed Acidosis (Respiratory & Metabolic)";
-                    }
-                } else if (ph > 7.45) { // --- Alkalosis ---
-                    if (pco2 < 35) {
-                        primaryDisorder = "Respiratory Alkalosis";
-                    } else if (hco3 > 26) {
-                        primaryDisorder = "Metabolic Alkalosis";
-                    } else {
-                        primaryDisorder = "Mixed Alkalosis (Respiratory & Metabolic)";
-                    }
-                } else { // --- Normal pH (7.35 - 7.45) ---
-                    if (pco2 > 45 && hco3 > 26) {
-                        primaryDisorder = "Fully Compensated Respiratory Acidosis";
-                    } else if (pco2 < 35 && hco3 < 22) {
-                        primaryDisorder = "Fully Compensated Respiratory Alkalosis";
-                    } else if (pco2 > 45 && hco3 < 22) {
-                        primaryDisorder = "Mixed Disorder (Resp. Acidosis + Met. Acidosis)";
-                    } else if (pco2 < 35 && hco3 > 26) {
-                        primaryDisorder = "Mixed Disorder (Resp. Alkalosis + Met. Alkalosis)";
-                    } else if (pco2 > 45 || pco2 < 35 || hco3 > 26 || hco3 < 22) {
-                        primaryDisorder = "Compensated Disorder or Mixed Picture";
-                    } else {
-                        primaryDisorder = "Normal Acid-Base Status";
-                    }
-                }
-                interpretation.unshift(`<li><strong>Primary Disorder:</strong> ${primaryDisorder}</li>`);
-
-                // 6. Compensation Analysis (based on provided formulas)
-                let compensationMsg = "";
-                const NORMAL_PCO2 = 40;
-                const NORMAL_HCO3 = 24;
-                const PCO2_TOLERANCE = 2; // Standard tolerance for pCO2
-                const HCO3_TOLERANCE = 2; // Standard tolerance for HCO3 (acute)
-                const HCO3_TOLERANCE_CHRONIC = 3; // Broader tolerance for chronic
-
-                if (primaryDisorder === "Metabolic Acidosis") {
-                    // For Every 1 drop in HCO3, pCO2 should drop by 5/4 (1.25)
-                    const hco3Drop = NORMAL_HCO3 - hco3;
-                    const expectedPco2 = NORMAL_PCO2 - (1.25 * hco3Drop);
-                    const lowerBound = expectedPco2 - PCO2_TOLERANCE;
-                    const upperBound = expectedPco2 + PCO2_TOLERANCE;
-
-                    if (pco2 >= lowerBound && pco2 <= upperBound) {
-                        compensationMsg = "Appropriate respiratory compensation.";
-                    } else if (pco2 > upperBound) {
-                        compensationMsg = "Compensation is less than expected (suggests a concurrent <strong>Respiratory Acidosis</strong>).";
-                    } else if (pco2 < lowerBound) {
-                        compensationMsg = "Compensation is more than expected (suggests a concurrent <strong>Respiratory Alkalosis</strong>).";
-                    }
-                    interpretation.push(`<li><strong>Compensation:</strong> ${compensationMsg} (Expected pCO₂: ${expectedPco2.toFixed(1)} ± ${PCO2_TOLERANCE})</li>`);
-
-                } else if (primaryDisorder === "Metabolic Alkalosis") {
-                    // For Every 1 rise in HCO3, pCO2 should rise by 3/4 (0.75)
-                    const hco3Rise = hco3 - NORMAL_HCO3;
-                    const expectedPco2 = NORMAL_PCO2 + (0.75 * hco3Rise);
-                    const lowerBound = expectedPco2 - PCO2_TOLERANCE;
-                    const upperBound = expectedPco2 + PCO2_TOLERANCE;
-
-                    if (pco2 >= lowerBound && pco2 <= upperBound) {
-                        compensationMsg = "Appropriate respiratory compensation.";
-                    } else if (pco2 < lowerBound) {
-                        compensationMsg = "Compensation is less than expected (suggests a concurrent <strong>Respiratory Alkalosis</strong>).";
-                    } else if (pco2 > upperBound) {
-                        compensationMsg = "Compensation is more than expected (suggests a concurrent <strong>Respiratory Acidosis</strong>).";
-                    }
-                    interpretation.push(`<li><strong>Compensation:</strong> ${compensationMsg} (Expected pCO₂: ${expectedPco2.toFixed(1)} ± ${PCO2_TOLERANCE})</li>`);
-
-                } else if (primaryDisorder === "Respiratory Acidosis") {
-                    // Check for both acute and chronic compensation
-                    const pco2Rise = pco2 - NORMAL_PCO2;
-                    
-                    // Acute: For Every 10 rise in pCO2, HCO3 should rise by 1
-                    const expectedHco3Acute = NORMAL_HCO3 + (1 * (pco2Rise / 10));
-                    const lowerAcute = expectedHco3Acute - HCO3_TOLERANCE;
-                    const upperAcute = expectedHco3Acute + HCO3_TOLERANCE;
-
-                    // Chronic: For Every 10 rise in pCO2, HCO3 should rise by 4
-                    const expectedHco3Chronic = NORMAL_HCO3 + (4 * (pco2Rise / 10));
-                    const lowerChronic = expectedHco3Chronic - HCO3_TOLERANCE_CHRONIC;
-                    const upperChronic = expectedHco3Chronic + HCO3_TOLERANCE_CHRONIC;
-
-                    if (hco3 >= lowerAcute && hco3 <= upperAcute) {
-                        compensationMsg = "Compensation is consistent with <strong>Acute Respiratory Acidosis</strong>.";
-                    } else if (hco3 >= lowerChronic && hco3 <= upperChronic) {
-                        compensationMsg = "Compensation is consistent with <strong>Chronic Respiratory Acidosis</strong>.";
-                    } else if (hco3 < lowerAcute) {
-                        compensationMsg = "Compensation is less than expected for an acute process (suggests a concurrent <strong>Metabolic Acidosis</strong>).";
-                    } else if (hco3 > upperChronic) {
-                        compensationMsg = "Compensation is more than expected for a chronic process (suggests a concurrent <strong>Metabolic Alkalosis</strong>).";
-                    } else {
-                        compensationMsg = "Compensation is in an intermediate phase (between acute and chronic).";
-                    }
-                    interpretation.push(`<li><strong>Compensation:</strong> ${compensationMsg}<br>(Acute Range: ${expectedHco3Acute.toFixed(1)} ± ${HCO3_TOLERANCE}, Chronic Range: ${expectedHco3Chronic.toFixed(1)} ± ${HCO3_TOLERANCE_CHRONIC})</li>`);
-
-                } else if (primaryDisorder === "Respiratory Alkalosis") {
-                    // Check for both acute and chronic compensation
-                    const pco2Fall = NORMAL_PCO2 - pco2;
-                    
-                    // Acute: For Every 10 fall in pCO2, HCO3 should fall by 2
-                    const expectedHco3Acute = NORMAL_HCO3 - (2 * (pco2Fall / 10));
-                    const lowerAcute = expectedHco3Acute - HCO3_TOLERANCE;
-                    const upperAcute = expectedHco3Acute + HCO3_TOLERANCE;
-
-                    // Chronic: For Every 10 fall in pCO2, HCO3 should fall by 4
-                    const expectedHco3Chronic = NORMAL_HCO3 - (4 * (pco2Fall / 10));
-                    const lowerChronic = expectedHco3Chronic - HCO3_TOLERANCE_CHRONIC;
-                    const upperChronic = expectedHco3Chronic + HCO3_TOLERANCE_CHRONIC;
-                    
-                    if (hco3 >= lowerAcute && hco3 <= upperAcute) {
-                        compensationMsg = "Compensation is consistent with <strong>Acute Respiratory Alkalosis</strong>.";
-                    } else if (hco3 >= lowerChronic && hco3 <= upperChronic) {
-                        compensationMsg = "Compensation is consistent with <strong>Chronic Respiratory Alkalosis</strong>.";
-                    } else if (hco3 > upperAcute) {
-                        compensationMsg = "Compensation is less than expected for an acute process (suggests a concurrent <strong>Metabolic Alkalosis</strong>).";
-                    } else if (hco3 < lowerChronic) {
-                        compensationMsg = "Compensation is more than expected for a chronic process (suggests a concurrent <strong>Metabolic Acidosis</strong>).";
-                    } else {
-                        compensationMsg = "Compensation is in an intermediate phase (between acute and chronic).";
-                    }
-                    interpretation.push(`<li><strong>Compensation:</strong> ${compensationMsg}<br>(Acute Range: ${expectedHco3Acute.toFixed(1)} ± ${HCO3_TOLERANCE}, Chronic Range: ${expectedHco3Chronic.toFixed(1)} ± ${HCO3_TOLERANCE_CHRONIC})</li>`);
-                }
-
-                // 7. Delta-Delta calculation (if HAGMA)
-                if (isHAGMA) {
-                    // Use correctedAG for this calculation
-                    const deltaAG = correctedAG - 12; // Change in AG from normal (12)
-                    const deltaHCO3 = 24 - hco3; // Change in bicarb from normal (24)
-                    let deltaRatio = NaN;
-                    
-                    if (deltaHCO3 !== 0) {
-                        deltaRatio = deltaAG / deltaHCO3;
-                        interpretation.push(`<li><strong>Delta-Delta Ratio:</strong> ${deltaRatio.toFixed(2)}</li>`);
-                        
-                        // Add interpretation of the delta ratio
-                        if (deltaRatio < 1.0) {
-                            interpretation.push(`<li>Ratio &lt; 1.0 suggests a concurrent <strong>Non-AG Metabolic Acidosis</strong>.</li>`);
-                            isNAGMA = true; // Mark NAGMA based on delta-delta
-                        } else if (deltaRatio > 2.0) {
-                            interpretation.push(`<li>Ratio &gt; 2.0 suggests a concurrent <strong>Metabolic Alkalosis</strong>.</li>`);
-                        } else {
-                            interpretation.push(`<li>Ratio (1.0-2.0) is consistent with a pure <strong>High AG Metabolic Acidosis</strong>.</li>`);
-                        }
-                    } else if (deltaAG > 0) {
-                         interpretation.push(`<li>Delta-Delta ratio is undefined (delta HCO₃ is zero), but a High AG is present.</li>`);
-                    }
-                }
-
-                // 8. Lactate Check
-                if (!isNaN(lactate)) {
-                    if (lactate > 2.0) {
-                        interpretation.push(`<li><span style="color: #D8000C;">Elevated Lactate</span> (${lactate.toFixed(1)}) detected. This is a common cause of HAGMA.</li>`);
-                    }
-                }
-
-                // 9. Osmolal Gap Calculation
-                if (!isNaN(na) && !isNaN(glucose) && !isNaN(bun) && !isNaN(measuredOsm)) {
-                    const calculatedOsm = (2 * na) + (glucose / 18) + (bun / 2.8);
-                    const osmolalGap = measuredOsm - calculatedOsm;
-
-                    interpretation.push(`<li><strong>Calculated Osmolality:</strong> ${calculatedOsm.toFixed(1)} mOsm/kg</li>`);
-                    interpretation.push(`<li><strong>Osmolal Gap:</strong> ${osmolalGap.toFixed(1)} mOsm/kg (Normal: < 10-15)</li>`);
-
-                    if (osmolalGap > 15) {
-                        if (isHAGMA) {
-                            interpretation.push(`<li><span style="color: #D8000C;">Elevated Osmolal Gap with HAGMA</span> suggests ingestion of a toxic alcohol (e.g., Methanol, Ethylene Glycol).</li>`);
-                        } else {
-                            interpretation.push(`<li><span style="color: #D8000C;">Elevated Osmolal Gap *without* HAGMA</span> suggests ingestion of a non-acidic osmole (e.g., Isopropyl Alcohol, Mannitol).</li>`);
-                        }
-                    }
-                } else if (!isNaN(na) && !isNaN(glucose) && !isNaN(bun)) {
-                    const calculatedOsm = (2 * na) + (glucose / 18) + (bun / 2.8);
-                    interpretation.push(`<li><strong>Calculated Osmolality:</strong> ${calculatedOsm.toFixed(1)} mOsm/kg</li>`);
-                    interpretation.push(`<li>Osmolal Gap not calculated (Measured Osmolality missing).</li>`);
-                } else {
-                    interpretation.push(`<li>Osmolal Gap not calculated (Na⁺, Glucose, or BUN missing).</li>`);
-                }
-
-                // 10. Urine Anion Gap (UAG) Calculation
-                if (!isNaN(uNa) && !isNaN(uK) && !isNaN(uCl)) {
-                    const uag = (uNa + uK) - uCl;
-                    interpretation.push(`<li><strong>Urine Anion Gap (UAG):</strong> ${uag.toFixed(1)}</li>`);
-
-                    // Only interpret UAG in the setting of NAGMA
-                    if (isNAGMA) {
-                        if (uag > 0) {
-                            interpretation.push(`<li>A <strong>positive UAG</strong> in the setting of NAGMA suggests a <strong>Renal Tubular Acidosis (RTA)</strong> (impaired renal H⁺ excretion).</li>`);
-                        } else {
-                            interpretation.push(`<li>A <strong>negative UAG</strong> in the setting of NAGMA suggests <strong>GI HCO₃⁻ loss</strong> (e.g., diarrhea) as the cause.</li>`);
-                        }
-                    }
-                } else {
-                    interpretation.push(`<li>Urine Anion Gap not calculated (Urine electrolytes missing).</li>`);
-                }
+<main>
+  <h1>Acid–Base Analyzer</h1>
+  <p class="sub">Stepwise ABG interpretation with mixed-disorder detection, serial trend tracking, and ventilator context.</p>
  
-                // 11. Display text results
-                resultsOutput.innerHTML = `<ul>${interpretation.join('')}</ul>`;
+  <form id="f">
+    <fieldset>
+      <div class="grid">
+        <div class="fld"><label for="ph">pH</label><input type="number" id="ph" step="0.01" placeholder="7.35–7.45"></div>
+        <div class="fld"><label for="pco2">pCO₂ (mmHg)</label><input type="number" id="pco2" step="0.1" placeholder="35–45"></div>
+        <div class="fld"><label for="hco3">HCO₃⁻ (mEq/L)</label><input type="number" id="hco3" step="0.1" placeholder="22–26"></div>
+        <div class="fld"><label for="na">Na⁺</label><input type="number" id="na" step="1" placeholder="135–145"></div>
+        <div class="fld"><label for="k">K⁺</label><input type="number" id="k" step="0.1" placeholder="3.5–5.0"></div>
+        <div class="fld"><label for="cl">Cl⁻</label><input type="number" id="cl" step="1" placeholder="98–106"></div>
+        <div class="fld"><label for="lactate">Lactate (mmol/L)</label><input type="number" id="lactate" step="0.1" placeholder="< 2.0"></div>
+        <div class="fld"><label for="albumin">Albumin (g/dL)</label><input type="number" id="albumin" step="0.1" placeholder="3.5–5.0"></div>
+      </div>
+    </fieldset>
  
-                // 12. Generate Recommendations
-                generateRecommendations({ph, pco2, hco3}, {primaryDisorder, isHAGMA, isNAGMA, ag: correctedAG}, ventParams, interpretation); // Pass correctedAG
-
-                // 13. Update the chart with patient data
-                drawDavenportDiagram({ ph, hco3, pco2 });
-            }
-
-            // --- New Function to Generate Recommendations ---
-            function generateRecommendations(values, findings, ventParams, interpretationList) {
-                let recommendations = [];
-                const { ph, pco2, hco3 } = values;
-                const { primaryDisorder, isHAGMA, isNAGMA, ag } = findings;
-
-                // --- Ventilation Recommendations ---
-                if (primaryDisorder.includes("Respiratory Acidosis") || pco2 > 45) {
-                    recommendations.push("<strong>Finding:</strong> Respiratory Acidosis (pCO₂ > 45). Patient is underventilated.");
-                    if (ventParams.mode !== "Not Set") {
-                        recommendations.push("<strong>Action:</strong> Consider increasing minute ventilation by raising Respiratory Rate (RR) or Tidal Volume (Vt).");
-                    } else {
-                        recommendations.push("<strong>Action:</strong> Assess patient's spontaneous ventilation. Consider non-invasive or invasive mechanical support if clinically indicated.");
-                    }
-                } else if (primaryDisorder.includes("Respiratory Alkalosis") || pco2 < 35) {
-                    recommendations.push("<strong>Finding:</strong> Respiratory Alkalosis (pCO₂ < 35). Patient may be overventilated or compensating.");
-                    // Check if it's NOT compensation for a metabolic acidosis
-                    if (!primaryDisorder.includes("Metabolic Acidosis")) {
-                         if (ventParams.mode !== "Not Set") {
-                            recommendations.push("<strong>Action:</strong> Consider decreasing Respiratory Rate (RR) or Tidal Volume (Vt). Assess for pain, anxiety, or other drivers of hyperventilation.");
-                        } else {
-                            recommendations.push("<strong>Action:</strong> Assess for pain, anxiety, or other drivers of hyperventilation.");
-                        }
-                    } else {
-                        recommendations.push("<strong>Info:</strong> This appears to be appropriate respiratory compensation for a metabolic acidosis. **Do not** reduce ventilation; focus on treating the underlying acidosis.");
-                    }
-                }
-
-                // --- Metabolic Recommendations ---
-                if (primaryDisorder.includes("Metabolic Acidosis") || isHAGMA || isNAGMA) {
-                    recommendations.push("<strong>Finding:</strong> Metabolic Acidosis detected.");
-                    recommendations.push("<strong>Action:</strong> Identify and treat the underlying cause.");
-                } else if (primaryDisorder.includes("Metabolic Alkalosis")) {
-                    recommendations.push("<strong>Finding:</strong> Metabolic Alkalosis detected.");
-                    recommendations.push("<strong>Action:</strong> Identify and treat the underlying cause (e.g., check volume status, replace K⁺, assess for diuretic use).");
-                }
-
-                // --- Gap-Specific Recommendations ---
-                if (isHAGMA) {
-                    let hasOsmGap = interpretationList.some(item => item.includes("Elevated Osmolal Gap with HAGMA"));
-                    let hasLactate = interpretationList.some(item => item.includes("Elevated Lactate"));
-                    
-                    if (hasOsmGap) {
-                        recommendations.push("<strong>Finding:</strong> High Anion Gap + High Osmolal Gap.");
-                        recommendations.push("<strong>Action:</strong> Strongly suspect toxic alcohol (Methanol, Ethylene Glycol) ingestion. Consider specific treatment (e.g., Fomepizole, dialysis).");
-                    } else if (hasLactate) {
-                        recommendations.push("<strong>Finding:</strong> High Anion Gap + High Lactate.");
-                        recommendations.push("<strong>Action:</strong> Lactic acidosis. Investigate and treat underlying cause of hypoperfusion/shock (e.g., sepsis, cardiogenic shock).");
-                    } else {
-                        recommendations.push("<strong>Finding:</strong> High Anion Gap (unspecified cause).");
-                        recommendations.push("<strong>Action:</strong> Consider other causes (e.g., Ketoacidosis, Renal Failure) if Lactate/Osm Gap are uninformative.");
-                    }
-                }
-                
-                if (isNAGMA) {
-                    let hasUagPositive = interpretationList.some(item => item.includes("positive UAG"));
-                    let hasUagNegative = interpretationList.some(item => item.includes("negative UAG"));
-
-                    if (hasUagPositive) {
-                        recommendations.push("<strong>Finding:</strong> Non-Anion Gap Acidosis + Positive UAG.");
-                        recommendations.push("<strong>Action:</strong> Suggests Renal Tubular Acidosis (RTA). Investigate renal function and serum K⁺.");
-                    } else if (hasUagNegative) {
-                        recommendations.push("<strong>Finding:</strong> Non-Anion Gap Acidosis + Negative UAG.");
-                        recommendations.push("<strong>Action:</strong> Suggests GI bicarbonate loss (e.g., severe diarrhea). Focus on fluid and electrolyte replacement.");
-                    }
-                }
-
-
-                // --- Display Recommendations ---
-                if (recommendations.length > 0) {
-                    recommendationsOutput.innerHTML = `<ul>${recommendations.map(r => `<li>${r}</li>`).join('')}</ul>`;
-                } else {
-                    recommendationsOutput.innerHTML = `<p>No specific recommendations generated based on the inputs. Values may be within normal limits.</p>`;
-                }
-            }
-
-
-            // --- Event Handler for Reset ---
-            function handleReset() {
-                // Clear the text results
-                resultsOutput.innerHTML = `<p>Enter values and click Calculate to see results.</p>`;
-                // Clear the recommendations
-                recommendationsOutput.innerHTML = `<p>Calculations must be run to generate recommendations.</p>`;
-                
-                // Redraw the base chart without any patient data
-                drawDavenportDiagram(null);
-            }
-
-            // --- Attach Event Listeners ---
-            form.addEventListener('submit', handleCalculate);
-            form.addEventListener('reset', handleReset);
-
-            // --- Initial Call ---
-            // Draw the empty chart when the page first loads
-            drawDavenportDiagram(null);
-
-        });
-    </script>
-
+    <details>
+      <summary>Additional labs (osmolal / urine gap)</summary>
+      <div class="grid">
+        <div class="fld"><label for="bun">BUN (mg/dL)</label><input type="number" id="bun" step="1"></div>
+        <div class="fld"><label for="glucose">Glucose (mg/dL)</label><input type="number" id="glucose" step="1"></div>
+        <div class="fld"><label for="measuredOsm">Meas. Osm</label><input type="number" id="measuredOsm" step="1"></div>
+        <div class="fld"><label for="ethanol">Ethanol (mg/dL)</label><input type="number" id="ethanol" step="1"></div>
+        <div class="fld"><label for="uNa">Urine Na⁺</label><input type="number" id="uNa" step="1"></div>
+        <div class="fld"><label for="uK">Urine K⁺</label><input type="number" id="uK" step="1"></div>
+        <div class="fld"><label for="uCl">Urine Cl⁻</label><input type="number" id="uCl" step="1"></div>
+      </div>
+    </details>
+ 
+    <details>
+      <summary>Ventilator / oxygenation</summary>
+      <div class="grid">
+        <div class="fld"><label for="ventMode">Mode</label>
+          <select id="ventMode"><option value="Not Set">Not set</option>
+            <option>AC-VC</option><option>AC-PC</option><option>SIMV-VC</option>
+            <option>SIMV-PC</option><option>PS/CPAP</option><option>Spontaneous</option></select></div>
+        <div class="fld"><label for="fio2">FiO₂ (%)</label><input type="number" id="fio2" step="1" min="21" max="100" placeholder="21"></div>
+        <div class="fld"><label for="pao2">PaO₂ (mmHg)</label><input type="number" id="pao2" step="1" placeholder="A–a gradient"></div>
+        <div class="fld"><label for="weight">IBW (kg)</label><input type="number" id="weight" step="1" placeholder="for mL/kg"></div>
+        <div class="fld"><label for="tidalVolume">Vt (mL)</label><input type="number" id="tidalVolume" step="10"></div>
+        <div class="fld"><label for="respRate">RR (bpm)</label><input type="number" id="respRate" step="1"></div>
+        <div class="fld"><label for="peep">PEEP (cmH₂O)</label><input type="number" id="peep" step="1"></div>
+      </div>
+    </details>
+ 
+    <div class="btns">
+      <button type="submit" class="go">Analyze</button>
+      <button type="button" id="logBtn" class="log">Analyze &amp; log to trend</button>
+      <button type="reset" class="rst">Reset</button>
+    </div>
+  </form>
+ 
+  <hr>
+ 
+  <div class="cols">
+    <div>
+      <h3>Interpretation</h3>
+      <div id="dx"></div>
+      <div id="out"><p class="placeholder">Enter values and analyze.</p></div>
+    </div>
+    <div>
+      <h3>Davenport diagram</h3>
+      <div class="chart-wrap"><canvas id="chart"></canvas></div>
+    </div>
+  </div>
+ 
+  <hr>
+  <h3>Recommendations &amp; likely pathophysiology</h3>
+  <div id="rec"><p class="placeholder">Analyze to generate guidance.</p></div>
+ 
+  <hr>
+  <h3>Serial ABG trend <span style="font-weight:400;font-size:.8rem;color:var(--muted)">— log successive gases to track the trajectory</span></h3>
+  <div id="trend"><p class="placeholder">No logged gases yet. Use “Analyze &amp; log to trend”.</p></div>
+ 
+  <footer>Educational decision support based on a stepwise textbook method. Correlate clinically; not a substitute for judgement.</footer>
+</main>
+ 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const $ = id => document.getElementById(id);
+  const num = id => { const v = parseFloat($(id).value); return isNaN(v) ? null : v; };
+  const f1 = x => (Math.round(x*10)/10).toFixed(1);
+  const ctx = $('chart').getContext('2d');
+  let chart = null;
+  const trendLog = [];
+ 
+  const N_HCO3 = 24, N_PCO2 = 40, N_AG = 10, N_ALB = 4.0;
+ 
+  function isobar(p){const a=[];for(let pH=7.0;pH<=7.8;pH+=0.02)a.push({x:pH,y:0.03*p*Math.pow(10,pH-6.1)});return a;}
+  function draw(pt=null, series=[]){
+    if(chart) chart.destroy();
+    const ds=[];
+    ds.push({label:'Normal',data:[{x:7.35,y:22},{x:7.45,y:22},{x:7.45,y:26},{x:7.35,y:26},{x:7.35,y:22}],
+      borderColor:'rgba(47,107,79,.55)',backgroundColor:'rgba(47,107,79,.10)',borderWidth:2,fill:true,type:'line',pointRadius:0,showLine:true});
+    [20,30,40,60,80].forEach(c=>ds.push({label:`pCO₂ ${c}`,data:isobar(c),type:'line',
+      borderColor:'rgba(120,135,145,.45)',borderWidth:1.2,pointRadius:0,borderDash:[5,5],showLine:true,fill:false}));
+    if(series.length>1){
+      ds.push({label:'Trend',data:series.map(s=>({x:s.ph,y:s.hco3})),type:'line',
+        borderColor:'rgba(138,90,0,.8)',borderWidth:1.6,pointRadius:4,showLine:true,fill:false,borderDash:[3,3]});
+    }
+    if(pt){
+      ds.push({label:`Patient pCO₂ (${f1(pt.pco2)})`,data:isobar(pt.pco2),type:'line',
+        borderColor:'rgba(13,106,140,.9)',borderWidth:2.2,pointRadius:0,showLine:true,fill:false});
+      ds.push({label:'Current',data:[{x:pt.ph,y:pt.hco3}],backgroundColor:'#b23a48',type:'scatter',pointRadius:7,pointHoverRadius:9});
+    }
+    chart=new Chart(ctx,{type:'scatter',data:{datasets:ds},options:{responsive:true,maintainAspectRatio:false,
+      scales:{x:{type:'linear',position:'bottom',title:{display:true,text:'pH',font:{size:13,weight:'bold'}},min:7.0,max:7.8},
+              y:{type:'linear',title:{display:true,text:'HCO₃⁻ (mEq/L)',font:{size:13,weight:'bold'}},min:8,max:60}},
+      plugins:{legend:{position:'bottom',labels:{boxWidth:16,font:{size:10},filter:l=>l.text!=='Normal'}},
+        tooltip:{callbacks:{label:c=>`${c.dataset.label}: pH ${c.parsed.x}, HCO₃⁻ ${f1(c.parsed.y)}`}}}}});
+  }
+ 
+  function analyze(d){
+    const {ph,pco2,hco3,na,k,cl,lactate,albumin,bun,glucose,measuredOsm,ethanol,uNa,uK,uCl,vent}=d;
+    const steps=[]; let dxClass='';
+    const S=(h,b)=>steps.push({h,b});
+ 
+    const Hcalc = 24*pco2/hco3;              // Henderson approximation [H+]
+    const Hmeas = Math.pow(10, 9-ph);        // [H+] implied by entered pH
+    const phFromHcalc = 9 - Math.log10(Hcalc);
+    const pctDiff = 100*Math.abs(Hcalc-Hmeas)/Hmeas;
+    S('Step 1 · Internal consistency',
+      `Henderson [H⁺] = 24 × ${f1(pco2)}/${f1(hco3)} = <span class="val">${f1(Hcalc)}</span> nmol/L → pH <span class="val">${phFromHcalc.toFixed(2)}</span>; entered pH implies [H⁺] ${f1(Hmeas)}. `
+      + (pctDiff<=20
+          ? `Within ${pctDiff.toFixed(0)}% — values are internally consistent.`
+          : `<span class="fa">Differ by ${pctDiff.toFixed(0)}% — inconsistent.</span>`));
+    if(pctDiff>20){
+      return {invalid:true, msg:`The pH, pCO₂ and HCO₃⁻ are internally inconsistent — the Henderson equation predicts [H⁺] ${f1(Hcalc)} (pH ${phFromHcalc.toFixed(2)}) but the entered pH implies [H⁺] ${f1(Hmeas)}, a ${pctDiff.toFixed(0)}% mismatch. Per the textbook method, repeat the electrolytes and ABG a few minutes apart before interpreting — this points to a pre-analytical or transcription error, not a real disorder.`};
+    }
+ 
+    let primary;
+    if(ph<7.35) primary = hco3<N_HCO3?'Metabolic acidosis':(pco2>N_PCO2?'Respiratory acidosis':'Acidemia (indeterminate)');
+    else if(ph>7.45) primary = hco3>N_HCO3?'Metabolic alkalosis':(pco2<N_PCO2?'Respiratory alkalosis':'Alkalemia (indeterminate)');
+    else {
+      if(hco3<N_HCO3 && ph<7.40) primary='Metabolic acidosis';
+      else if(pco2>N_PCO2 && ph<7.40) primary='Respiratory acidosis';
+      else if(hco3>N_HCO3 && ph>7.40) primary='Metabolic alkalosis';
+      else if(pco2<N_PCO2 && ph>7.40) primary='Respiratory alkalosis';
+      else primary='Normal pH — inspect AG and compensation';
+    }
+    if(primary.includes('acidosis')||primary.includes('Acidemia')) dxClass='acid';
+    else if(primary.includes('alkalosis')||primary.includes('Alkalemia')) dxClass='alk';
+    S('Step 3 · Primary disorder',
+      `pH ${ph.toFixed(2)} (pivot 7.40), HCO₃⁻ ${f1(hco3)}, pCO₂ ${f1(pco2)} → <b>${primary}</b>.`);
+ 
+    let ag=null,cAG=null,agState='n/a';
+    if(na!==null&&cl!==null){
+      ag=na-(cl+hco3);
+      if(albumin!==null){
+        cAG=ag+2.5*(N_ALB-albumin);
+        agState = cAG>16?'high':(cAG>12?'borderline':(cAG<6?'low':'normal'));
+        S('Step 4 · Anion gap',
+          `AG = ${na} − (${cl} + ${f1(hco3)}) = <span class="val">${f1(ag)}</span>. Albumin ${f1(albumin)} → corrected AG <span class="val">${f1(cAG)}</span> (${agState}).`
+          + `<div class="why">Correcting for albumin matters: each 1 g/dL fall in albumin lowers the measured gap by ~2.5, so a "normal" AG can hide an organic acidosis in a hypoalbuminaemic patient.</div>`);
+      } else {
+        cAG=ag; agState = cAG>16?'high':(cAG>12?'borderline':(cAG<6?'low':'normal'));
+        S('Step 4 · Anion gap',
+          `AG = ${na} − (${cl} + ${f1(hco3)}) = <span class="val">${f1(ag)}</span> (${agState}). Albumin not entered — correction not applied.`
+          + (agState==='low'?`<div class="why">A low AG is itself abnormal — consider hypoalbuminaemia (commonest), or unmeasured cations (e.g. IgG paraproteinaemia, lithium, severe hypercalcaemia).</div>`:''));
+      }
+    } else {
+      S('Step 4 · Anion gap', `Not calculated (Na⁺ or Cl⁻ missing). The AG is the single most important step for uncovering hidden acidosis — enter electrolytes.`);
+    }
+    const highAG = agState==='high';
+    const veryHighAG = cAG!==null && cAG>24;   // unambiguously a second disorder, not incidental
+ 
+    const disorders=[]; let compLine='';
+    if(primary==='Metabolic acidosis'){
+      disorders.push(highAG?'High-anion-gap metabolic acidosis':'Normal-anion-gap metabolic acidosis');
+      const exp=1.5*hco3+8;
+      compLine=`Winter's: expected pCO₂ = 1.5 × ${f1(hco3)} + 8 = <span class="val">${f1(exp)}</span> ± 2 (i.e. ${f1(exp-2)}–${f1(exp+2)}).`;
+      if(pco2>exp+2){disorders.push('concurrent respiratory acidosis'); compLine+=` Measured pCO₂ ${f1(pco2)} is <span class="fa">above</span> expected → superimposed <b>respiratory acidosis</b>.`;}
+      else if(pco2<exp-2){disorders.push('concurrent respiratory alkalosis'); compLine+=` Measured pCO₂ ${f1(pco2)} is <span class="fk">below</span> expected → superimposed <b>respiratory alkalosis</b>.`;}
+      else compLine+=` Measured pCO₂ ${f1(pco2)} is within range → appropriate respiratory compensation (simple disorder).`;
+    }
+    else if(primary==='Metabolic alkalosis'){
+      disorders.push('Metabolic alkalosis');
+      const exp=40+0.7*(hco3-N_HCO3);
+      compLine=`Expected pCO₂ = 40 + 0.7 × (${f1(hco3)} − 24) = <span class="val">${f1(exp)}</span> ± 2.`;
+      if(pco2<exp-2){disorders.push('concurrent respiratory alkalosis'); compLine+=` Measured pCO₂ ${f1(pco2)} <span class="fk">below</span> expected → superimposed <b>respiratory alkalosis</b>.`;}
+      else if(pco2>exp+2){disorders.push('concurrent respiratory acidosis'); compLine+=` Measured pCO₂ ${f1(pco2)} <span class="fa">above</span> expected → superimposed <b>respiratory acidosis</b>.`;}
+      else compLine+=` pCO₂ ${f1(pco2)} within range → appropriate compensation.`;
+      if(veryHighAG){disorders.push('hidden high-AG metabolic acidosis'); compLine+=` AG ${f1(cAG)} markedly high → coexisting <b>high-AG metabolic acidosis</b>.`;}
+      else if(highAG) compLine+=` <span class="why" style="display:inline">Note: AG mildly high (${f1(cAG)}); a mild rise is common in alkalaemia itself.</span>`;
+    }
+    else if(primary==='Respiratory acidosis'){
+      const rise=pco2-N_PCO2, acute=N_HCO3+0.1*rise, chronic=N_HCO3+0.4*rise;
+      const isChronic=Math.abs(hco3-chronic)<Math.abs(hco3-acute);
+      disorders.push(isChronic?'Chronic respiratory acidosis':'Acute respiratory acidosis');
+      compLine=`Renal compensation: acute expects HCO₃⁻ ≈ <span class="val">${f1(acute)}</span> (+0.1/mmHg), chronic ≈ <span class="val">${f1(chronic)}</span> (+0.4/mmHg). Measured ${f1(hco3)} → best fits <b>${isChronic?'chronic':'acute'}</b>.`;
+      if(hco3<acute-3){disorders.push('superimposed metabolic acidosis'); compLine+=` HCO₃⁻ lower than either prediction → added <span class="fa">metabolic acidosis</span>.`;}
+      else if(hco3>chronic+3){disorders.push('superimposed metabolic alkalosis'); compLine+=` HCO₃⁻ higher than chronic → added <span class="fk">metabolic alkalosis</span>.`;}
+      else if(!isChronic && rise>=15 && hco3<chronic-3){
+        compLine+=` <span class="why" style="display:inline">Caveat: with this degree of chronic hypercapnia (e.g. known COPD), HCO₃⁻ ${f1(hco3)} is well below the chronic expectation of ${f1(chronic)} — if the process is in fact chronic, a superimposed <b>metabolic acidosis</b> (e.g. diarrhoea, renal) is likely. History decides.</span>`;
+      }
+      const expectedRA=isChronic?chronic:acute;
+      if(highAG && hco3<expectedRA-3 && !disorders.includes('superimposed metabolic acidosis')){disorders.push('concurrent high-AG metabolic acidosis'); compLine+=` AG is high (${f1(cAG)}) with HCO₃⁻ below expected → coexisting <b>high-AG metabolic acidosis</b>.`;}
+      else if(highAG) compLine+=` <span class="why" style="display:inline">Note: AG is high (${f1(cAG)}); interpret alongside the clinical picture.</span>`;
+      else if(highAG) compLine+=` <span class="why" style="display:inline">Note: AG is mildly high (${f1(cAG)}); interpret alongside the clinical picture rather than as a definite second disorder.</span>`;
+    }
+    else if(primary==='Respiratory alkalosis'){
+      const fall=N_PCO2-pco2, acute=N_HCO3-0.2*fall, chronic=N_HCO3-0.4*fall;
+      const isChronic=Math.abs(hco3-chronic)<Math.abs(hco3-acute);
+      const expected=isChronic?chronic:acute;
+      disorders.push(isChronic?'Chronic respiratory alkalosis':'Acute respiratory alkalosis');
+      compLine=`Renal compensation: acute expects HCO₃⁻ ≈ <span class="val">${f1(acute)}</span> (−0.2/mmHg), chronic ≈ <span class="val">${f1(chronic)}</span> (−0.4/mmHg). Measured ${f1(hco3)} → best fits <b>${isChronic?'chronic':'acute'}</b>.`;
+      // concurrent HAGMA if HCO3 is well below what compensation explains AND gap is high
+      if(highAG && hco3 < expected-3){disorders.push('concurrent high-AG metabolic acidosis'); compLine+=` HCO₃⁻ ${f1(hco3)} is well below the expected ${f1(expected)} and the AG is high (${f1(cAG)}) → superimposed <b>high-AG metabolic acidosis</b> (classic salicylate/lactate picture).`;}
+      else if(highAG) compLine+=` <span class="why" style="display:inline">Note: AG is high (${f1(cAG)}) but HCO₃⁻ sits near the expected compensation, so the gap is not dragging bicarbonate down — investigate the gap clinically, but it is not a definite second disorder here.</span>`;
+    }
+    else {
+      if(highAG){
+        disorders.push('hidden high-AG metabolic acidosis');
+        compLine=`Gas looks normal, but the anion gap is elevated — this is the textbook trap: a high AG at normal pH means a metabolic acidosis is masked by a second, offsetting process.`;
+        const dAG=cAG-N_AG, dHCO3=N_HCO3-hco3;
+        if(dHCO3<=0 || dAG/dHCO3>2){disorders.push('concurrent metabolic alkalosis'); compLine+=` ΔAG/ΔHCO₃⁻ ${dHCO3>0?('= '+ (dAG/dHCO3).toFixed(2)):'undefined'} (≫2) → superimposed <b>metabolic alkalosis</b> raising HCO₃⁻ back to normal.`;}
+        else if(dHCO3>0 && dAG/dHCO3<1){disorders.push('concurrent normal-AG metabolic acidosis'); compLine+=` ΔAG/ΔHCO₃⁻ = ${(dAG/dHCO3).toFixed(2)} (<1) → additional <b>normal-AG acidosis</b>.`;}
+        dxClass='warn';
+      } else {
+        disorders.push('Normal acid–base status');
+        compLine=`pH, HCO₃⁻, pCO₂ and anion gap all within normal limits.`;
+      }
+    }
+    S('Step 6 · Expected compensation & mixed check', compLine);
+ 
+    if(highAG && primary==='Metabolic acidosis'){
+      const dAG=cAG-N_AG, dHCO3=N_HCO3-hco3;
+      if(dHCO3>0){
+        const ratio=dAG/dHCO3;
+        let txt;
+        if(ratio<0.4){txt='ratio < 0.4 → mainly a normal-AG acidosis'; disorders.push('concurrent normal-AG metabolic acidosis');}
+        else if(ratio<1){txt='ratio 0.4–1 → mixed high-AG + normal-AG acidosis'; disorders.push('concurrent normal-AG metabolic acidosis');}
+        else if(ratio<=2){txt='ratio 1–2 → pure high-AG metabolic acidosis';}
+        else {txt='ratio > 2 → concurrent metabolic alkalosis (or chronic respiratory acidosis)'; disorders.push('concurrent metabolic alkalosis');}
+        S('Step 8 · ΔAG/ΔHCO₃⁻ ratio',
+          `ΔAG ${f1(dAG)} / ΔHCO₃⁻ ${f1(dHCO3)} = <span class="val">${ratio.toFixed(2)}</span> — ${txt}.`);
+      }
+    }
+ 
+    if(lactate!==null){
+      if(lactate>4) S('Lactate', `<span class="fa">${f1(lactate)} mmol/L — markedly elevated.</span> A dominant driver of a high-AG acidosis and a marker of tissue hypoperfusion; trend it with resuscitation.`);
+      else if(lactate>2) S('Lactate', `<span class="fa">${f1(lactate)} mmol/L — elevated.</span> Contributes to the anion gap; look for hypoperfusion, sepsis, ischaemia, metformin, or medication causes.`);
+      else S('Lactate', `${f1(lactate)} mmol/L — normal. If a high AG persists without lactate, pursue ketones, urate, salicylate, or toxic alcohols.`);
+    }
+ 
+    if(na!==null&&glucose!==null&&bun!==null){
+      let calcOsm=2*na+glucose/18+bun/2.8; if(ethanol!==null) calcOsm+=ethanol/3.7;
+      let line=`Calculated osmolality = <span class="val">${f1(calcOsm)}</span> mOsm/kg${ethanol!==null?' (ethanol included)':''}.`;
+      if(measuredOsm!==null){
+        const og=measuredOsm-calcOsm;
+        line+=` Osmolal gap = <span class="val">${f1(og)}</span> (normal &lt; 10–15).`;
+        if(og>15) line+= highAG
+          ? ` <span class="fa">High gap + high AG → suspect toxic alcohol</span> (methanol, ethylene glycol).`
+          : ` <span class="fa">High gap without acidosis → isopropanol, mannitol, or early toxic-alcohol.</span>`;
+        else if(highAG) line+=` A normal osmolal gap does <b>not</b> exclude late methanol/ethylene-glycol (the gap closes as the parent alcohol is metabolised to acid).`;
+        S('Osmolal gap', line);
+      }
+    }
+ 
+    if(uNa!==null&&uK!==null&&uCl!==null){
+      const uag=(uNa+uK)-uCl;
+      const isNAG = disorders.some(x=>x.includes('normal-AG')||x.includes('normal-anion'));
+      let line=`Urine AG = (${uNa} + ${uK}) − ${uCl} = <span class="val">${f1(uag)}</span>.`;
+      if(isNAG) line+= uag>0
+        ? ` Positive with a normal-AG acidosis → impaired renal NH₄⁺ excretion → <b>renal tubular acidosis</b>.`
+        : ` Negative with a normal-AG acidosis → intact NH₄⁺ excretion → <b>GI HCO₃⁻ loss</b> (e.g. diarrhoea).`;
+      S('Urine anion gap', line);
+    }
+ 
+    if(vent.pao2!==null){
+      const fio2=(vent.fio2!==null?vent.fio2:21)/100;
+      const PAO2=fio2*(760-47)-pco2/0.8, aa=PAO2-vent.pao2;
+      S('A–a gradient',
+        `A–a = ${f1(PAO2)} − ${f1(vent.pao2)} = <span class="val">${f1(aa)}</span> mmHg (FiO₂ ${vent.fio2!==null?vent.fio2:21}%).`
+        +`<div class="why">Room-air upper limit ≈ (age/4)+4. A widened gradient points to V/Q mismatch, shunt, or diffusion defect rather than pure hypoventilation — useful when hypercapnia is present but the lungs may also be the problem.</div>`);
+    }
+ 
+    const uniq=[...new Set(disorders)];
+    let integrated = uniq.length===1 ? uniq[0] : 'Mixed disorder: '+uniq.join(' + ');
+    return {primary, integrated, disorders:uniq, dxClass, steps, ag, cAG, agState, ph, pco2, hco3, lactate};
+  }
+ 
+  function recommend(r, vent){
+    const R=[]; const d=r.disorders.join(' ; ').toLowerCase();
+    const vented = vent.mode!=='Not Set' && vent.mode!=='Spontaneous';
+    const respAcid = d.includes('respiratory acidosis');
+    const respAlk = d.includes('respiratory alkalosis');
+    const metAcid = d.includes('metabolic acidosis')||d.includes('anion-gap');
+    const metAlk = d.includes('metabolic alkalosis');
+    const compensating = metAcid && respAlk;
+ 
+    if(respAcid){
+      R.push(['a','<b>Respiratory acidosis</b> — CO₂ retention from inadequate alveolar ventilation. Pathophysiology: minute ventilation is failing to clear CO₂ (airway obstruction, respiratory fatigue, sedation, or neuromuscular weakness).']);
+      R.push(['', vented
+        ? `On the ventilator, minute ventilation = Vt × RR. To lower pCO₂, raise RR first, then Vt (target ~6 mL/kg IBW${vent.tidalVolume!==null&&vent.weight?`; current ≈ ${f1(vent.tidalVolume/vent.weight)} mL/kg`:''}). Watch plateau pressure and auto-PEEP; permissive hypercapnia is acceptable in ARDS/severe asthma if pH is tolerated.`
+        : 'Support ventilation: treat the reversible cause, consider NIV; escalate to intubation for fatigue, falling GCS, or refractory acidaemia.']);
+    }
+    if(respAlk && !compensating){
+      R.push(['k','<b>Respiratory alkalosis</b> — CO₂ blown off by excess ventilation. Pathophysiology: a stimulus (hypoxaemia, pain, anxiety, sepsis, PE, CNS drive) is driving hyperventilation.']);
+      R.push(['', vented
+        ? 'Reduce set RR or Vt and confirm the patient is not over-triggering; ensure adequate sedation/analgesia.'
+        : 'Find and treat the driver — check oxygenation, exclude PE and sepsis, address pain/anxiety.']);
+    }
+    if(compensating){
+      R.push(['','<b>Note:</b> the low pCO₂ here is <i>appropriate compensation</i> for the metabolic acidosis, not a primary respiratory alkalosis. Do not suppress the respiratory drive — treating the acidosis is what corrects the pCO₂. If this patient were intubated, matching their spontaneous minute ventilation is essential; dropping it precipitates dangerous acidaemia.']);
+    }
+    if(metAcid){
+      R.push(['a','<b>Metabolic acidosis</b> — identify and treat the source.']);
+      if(r.lactate!==null && r.lactate>2) R.push(['','Lactic acidosis: restore perfusion (fluids, source control of sepsis, treat shock). Bicarbonate is reserved for severe acidaemia by judgement — it does not replace treating the cause.']);
+      if(d.includes('high-anion-gap')||d.includes('high-ag')) R.push(['','High-AG: work through the GOLD-MARK / MUDPILES differential — lactate, ketones (DKA/starvation/alcoholic), urate (renal failure), salicylate, toxic alcohols. Use the osmolal gap and ketones to narrow it.']);
+      if(d.includes('normal-ag')||d.includes('normal-anion')) R.push(['','Normal-AG: use the urine AG to separate renal (RTA — positive UAG) from GI bicarbonate loss (diarrhoea — negative UAG).']);
+    }
+    if(metAlk){
+      R.push(['k','<b>Metabolic alkalosis</b> — assess volume and chloride status. Pathophysiology: HCO₃⁻ gain or H⁺/Cl⁻ loss, sustained by volume/chloride/potassium depletion.']);
+      R.push(['','Check urine Cl⁻: &lt; 20 = chloride-responsive (vomiting, NG suction, diuretics) → normal saline + KCl; &gt; 20 = chloride-resistant (mineralocorticoid excess) → treat the cause, do not volume-load.']);
+    }
+    if(r.agState==='low') R.push(['','Low anion gap is abnormal — check albumin first, then consider paraproteinaemia (myeloma), lithium, or severe hypercalcaemia.']);
+    if(r.primary.includes('indeterminate')) R.push(['a','pH is deranged but neither HCO₃⁻ nor pCO₂ explains it in the expected direction — recheck the sample and the electrolytes.']);
+    if(!R.length) R.push(['','Values within normal limits — no specific acid–base intervention indicated.']);
+ 
+    $('rec').innerHTML=`<ul class="rec">${R.map(([c,t])=>`<li class="${c}">${t}</li>`).join('')}</ul>`;
+  }
+ 
+  function collect(){
+    return {
+      ph:num('ph'),pco2:num('pco2'),hco3:num('hco3'),na:num('na'),k:num('k'),cl:num('cl'),
+      lactate:num('lactate'),albumin:num('albumin'),bun:num('bun'),glucose:num('glucose'),
+      measuredOsm:num('measuredOsm'),ethanol:num('ethanol'),uNa:num('uNa'),uK:num('uK'),uCl:num('uCl'),
+      vent:{mode:$('ventMode').value,fio2:num('fio2'),pao2:num('pao2'),weight:num('weight'),
+            tidalVolume:num('tidalVolume'),respRate:num('respRate'),peep:num('peep')}
+    };
+  }
+ 
+  function run(logIt){
+    const d=collect();
+    if(d.ph===null||d.pco2===null||d.hco3===null){
+      $('dx').innerHTML=''; $('out').innerHTML=`<p class="err">Enter pH, pCO₂ and HCO₃⁻ to analyze.</p>`;
+      if(!chart) draw(null); return;
+    }
+    if(d.ph<6.5||d.ph>8.0||d.pco2<=0||d.hco3<=0){
+      $('dx').innerHTML=''; $('out').innerHTML=`<p class="err">Values out of physiological range — check pH, pCO₂ and HCO₃⁻.</p>`;
+      draw(null); return;
+    }
+    const r=analyze(d);
+    if(r.invalid){
+      $('dx').innerHTML=''; $('out').innerHTML=`<p class="err">${r.msg}</p>`;
+      $('rec').innerHTML=`<p class="placeholder">Resolve the inconsistency before generating guidance.</p>`;
+      draw(null); return;
+    }
+    $('dx').innerHTML=`<div class="dx ${r.dxClass}">${r.integrated}<small>Primary: ${r.primary}</small></div>`;
+    $('out').innerHTML=r.steps.map(s=>`<div class="step"><div class="h">${s.h}</div><div class="b">${s.b}</div></div>`).join('');
+    recommend(r, d.vent);
+ 
+    if(logIt) trendLog.push({ph:d.ph,pco2:d.pco2,hco3:d.hco3,lactate:d.lactate,ag:r.cAG,dx:r.integrated,t:new Date()});
+    renderTrend();
+    draw({ph:d.ph,hco3:d.hco3,pco2:d.pco2}, trendLog);
+  }
+ 
+  function arrow(cur, prev, goodDir){
+    if(prev==null||cur==null) return '';
+    const diff=cur-prev;
+    if(Math.abs(diff)<0.01) return '<span class="arrow">→</span>';
+    const up=diff>0;
+    const good = (up && goodDir>0)||(!up && goodDir<0);
+    if(goodDir===0) return `<span class="arrow">${up?'▲':'▼'}</span>`;
+    return `<span class="arrow ${good?'up':'dn'}">${up?'▲':'▼'}</span>`;
+  }
+  function renderTrend(){
+    if(!trendLog.length){ $('trend').innerHTML=`<p class="placeholder">No logged gases yet. Use “Analyze &amp; log to trend”.</p>`; return; }
+    const rows=trendLog.map((g,i)=>{
+      const p=i>0?trendLog[i-1]:null;
+      const tm=g.t.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      const lac = g.lactate!=null?`${f1(g.lactate)} ${p&&p.lactate!=null?arrow(g.lactate,p.lactate,-1):''}`:'—';
+      const agc = g.ag!=null?f1(g.ag):'—';
+      return `<tr><td>#${i+1} · ${tm}</td>
+        <td>${g.ph.toFixed(2)} ${p?arrow(g.ph,p.ph, g.ph<7.4?1:-1):''}</td>
+        <td>${f1(g.pco2)} ${p?arrow(g.pco2,p.pco2,0):''}</td>
+        <td>${f1(g.hco3)} ${p?arrow(g.hco3,p.hco3,0):''}</td>
+        <td>${agc}</td><td>${lac}</td>
+        <td style="text-align:left;font-size:.8rem">${g.dx}</td></tr>`;
+    }).join('');
+    let verdict='';
+    if(trendLog.length>1){
+      const a=trendLog[0], b=trendLog[trendLog.length-1];
+      const dpH=Math.abs(b.ph-7.4)-Math.abs(a.ph-7.4);
+      const dLac=(a.lactate!=null&&b.lactate!=null)?b.lactate-a.lactate:null;
+      let cls,txt;
+      if(dpH < -0.02 && (dLac===null||dLac<=0)){cls='improving'; txt='Improving — pH is trending toward normal'+(dLac!=null?' and lactate is falling':'')+'.';}
+      else if(dpH > 0.02 || (dLac!=null&&dLac>1)){cls='deteriorating'; txt='Deteriorating — pH is moving away from normal'+(dLac!=null&&dLac>1?' and lactate is rising':'')+'. Reassess the driver and escalate.';}
+      else {cls='mixed'; txt='Broadly stable / no clear directional change yet.';}
+      verdict=`<div class="verdict ${cls}">${txt}</div>`;
+    }
+    $('trend').innerHTML=`<div class="trend"><table>
+      <thead><tr><th>Gas</th><th>pH</th><th>pCO₂</th><th>HCO₃⁻</th><th>AG</th><th>Lactate</th><th>Interpretation</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>${verdict}
+      <div class="btns"><button type="button" class="rst" id="clearTrend">Clear trend log</button></div>`;
+    $('clearTrend').addEventListener('click',()=>{trendLog.length=0; renderTrend(); draw(null);});
+  }
+ 
+  $('f').addEventListener('submit',e=>{e.preventDefault(); run(false);});
+  $('logBtn').addEventListener('click',()=>run(true));
+  $('f').addEventListener('reset',()=>{
+    $('dx').innerHTML=''; $('out').innerHTML=`<p class="placeholder">Enter values and analyze.</p>`;
+    $('rec').innerHTML=`<p class="placeholder">Analyze to generate guidance.</p>`;
+    trendLog.length=0; renderTrend(); draw(null);
+  });
+  draw(null);
+});
+</script>
 </body>
 </html>
-
-
-
-
+ 
