@@ -70,13 +70,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function runAlkalosis(){
+    const d = lastAnalysis ? lastAnalysis.d : collect();
+    const weight = num('alkWeight');
+    ABG.Alkalosis.render($('alkOut'), { hco3:d.hco3, cl:d.cl, ph:d.ph, uCl:d.uCl, weight });
+  }
+
   function runVentSim(){
     const current = {
       rr: num('respRate'), vt: num('tidalVolume'), fio2: num('fio2'), pao2: num('pao2'),
       pco2: num('pco2'), hco3: num('hco3'), peep: num('peep'),
-      compliance: num('compliance'), vdvt: num('vdvt'), ibw: num('weight')
+      compliance: num('compliance'), vdvt: num('vdvt'), ibw: num('weight'),
+      resistance: num('resistance'), ti: num('ti'),
+      na: num('na'), cl: num('cl'), albumin: num('albumin'), lactate: num('lactate')
     };
-    const target = { rr: num('simRR'), vt: num('simVt'), fio2: num('simFio2'), peep: num('simPeep') };
+    const target = {
+      rr: num('simRR'), vt: num('simVt'), fio2: num('simFio2'), peep: num('simPeep'), pplatMeasured: num('simPplat'),
+      mode: $('simMode').value, dpSet: num('simDP')
+    };
     const result = ABG.VentSim.simulate(current, target);
     ABG.VentSim.render($('ventSimOut'), result);
   }
@@ -93,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   $('nephroBtn').addEventListener('click', runNephro);
+  $('alkBtn').addEventListener('click', runAlkalosis);
   $('ventSimBtn').addEventListener('click', runVentSim);
   $('printBtn').addEventListener('click', () => ABG.Export.printReport());
 

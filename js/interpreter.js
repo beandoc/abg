@@ -63,8 +63,8 @@ ABG.Interpreter = (function(){
     const disorders=[]; let compLine='';
     if(primary==='Metabolic acidosis'){
       disorders.push(highAG?'High-anion-gap metabolic acidosis':'Normal-anion-gap metabolic acidosis');
-      const exp=C.wintersExpectedPCO2(hco3);
-      compLine=`Winter's: expected pCO₂ = 1.5 × ${f1(hco3)} + 8 = <span class="val">${f1(exp)}</span> ± 2 (i.e. ${f1(exp-2)}–${f1(exp+2)}).`;
+      const exp=C.metAcidExpectedPCO2(hco3);
+      compLine=`Expected pCO₂ = 40 − [1.2 × (24 − ${f1(hco3)})] = <span class="val">${f1(exp)}</span> ± 2 (i.e. ${f1(exp-2)}–${f1(exp+2)}).`;
       if(pco2>exp+2){disorders.push('concurrent respiratory acidosis'); compLine+=` Measured pCO₂ ${f1(pco2)} is <span class="fa">above</span> expected → superimposed <b>respiratory acidosis</b>.`;}
       else if(pco2<exp-2){disorders.push('concurrent respiratory alkalosis'); compLine+=` Measured pCO₂ ${f1(pco2)} is <span class="fk">below</span> expected → superimposed <b>respiratory alkalosis</b>.`;}
       else compLine+=` Measured pCO₂ ${f1(pco2)} is within range → appropriate respiratory compensation (simple disorder).`;
@@ -141,8 +141,8 @@ ABG.Interpreter = (function(){
       let line=`Calculated osmolality = <span class="val">${f1(calcOsm)}</span> mOsm/kg${ethanol!==null?' (ethanol included)':''}.`;
       if(measuredOsm!==null){
         const og=C.osmolalGap(measuredOsm,calcOsm);
-        line+=` Osmolal gap = <span class="val">${f1(og)}</span> (normal &lt; 10–15).`;
-        if(og>15) line+= highAG
+        line+=` Osmolal gap = <span class="val">${f1(og)}</span> (normal &lt; 10 mOsm/kg H₂O).`;
+        if(og>10) line+= highAG
           ? ` <span class="fa">High gap + high AG → suspect toxic alcohol</span> (methanol, ethylene glycol).`
           : ` <span class="fa">High gap without acidosis → isopropanol, mannitol, or early toxic-alcohol.</span>`;
         else if(highAG) line+=` A normal osmolal gap does <b>not</b> exclude late methanol/ethylene-glycol (the gap closes as the parent alcohol is metabolised to acid).`;
@@ -170,7 +170,7 @@ ABG.Interpreter = (function(){
 
     const uniq=[...new Set(disorders)];
     let integrated = uniq.length===1 ? uniq[0] : 'Mixed disorder: '+uniq.join(' + ');
-    return {primary, integrated, disorders:uniq, dxClass, steps, ag, cAG, agState, ph, pco2, hco3, lactate};
+    return {primary, integrated, disorders:uniq, dxClass, steps, ag, cAG, agState, ph, pco2, hco3, lactate, uCl};
   }
 
   function recommend(r, vent){
@@ -205,7 +205,13 @@ ABG.Interpreter = (function(){
     }
     if(metAlk){
       R.push(['k','<b>Metabolic alkalosis</b> — assess volume and chloride status. Pathophysiology: HCO₃⁻ gain or H⁺/Cl⁻ loss, sustained by volume/chloride/potassium depletion.']);
-      R.push(['','Check urine Cl⁻: &lt; 20 = chloride-responsive (vomiting, NG suction, diuretics) → normal saline + KCl; &gt; 20 = chloride-resistant (mineralocorticoid excess) → treat the cause, do not volume-load.']);
+      const uCl = r.uCl;
+      if(uCl!=null) R.push(['', uCl<20
+        ? `Urine Cl⁻ ${f1(uCl)} mEq/L (&lt;20) → <b>chloride-sensitive</b> (vomiting, NG suction, diuretic after-effect, laxative abuse) → replace with isotonic saline + KCl; see “Metabolic alkalosis management” below for the dosing calculation.`
+        : `Urine Cl⁻ ${f1(uCl)} mEq/L (&gt;20) → <b>chloride-resistant</b> (primary hyperaldosteronism, exogenous mineralocorticoid, licorice) → saline will not correct this; treat the underlying cause instead.`]);
+      else R.push(['','Check urine Cl⁻: &lt; 20 = chloride-sensitive (vomiting, NG suction, diuretics) → normal saline + KCl; &gt; 20 = chloride-resistant (mineralocorticoid excess) → treat the cause, do not volume-load.']);
+      if(r.hco3>50 || r.ph>7.55) R.push(['a',`<span class="fa">Severe alkalosis</span> (HCO₃⁻ ${f1(r.hco3)}${r.hco3>50?' &gt;50':''}${r.ph>7.55?`, pH ${r.ph.toFixed(2)} &gt;7.55`:''}) — consider an HCl infusion if K⁺/acetazolamide are insufficient; see the dosing panel below. Reserve for refractory severe cases and infuse via a large central vein.`]);
+      R.push(['','Expanded-volume states (heart failure, cirrhosis, cor pulmonale) where saline is counterproductive can be treated with acetazolamide 250–375 mg IV/PO instead. Check magnesium before/while replacing K⁺ — hypomagnesemia can make diuretic-induced hypokalemia refractory to K⁺ alone.']);
     }
     if(r.agState==='low') R.push(['','Low anion gap is abnormal — check albumin first, then consider paraproteinaemia (myeloma), lithium, or severe hypercalcaemia.']);
     if(r.primary.includes('indeterminate')) R.push(['a','pH is deranged but neither HCO₃⁻ nor pCO₂ explains it in the expected direction — recheck the sample and the electrolytes.']);

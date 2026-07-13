@@ -70,19 +70,25 @@
       <div class="grid">
         <div class="fld"><label for="compliance">Compliance (mL/cmH₂O)</label><input type="number" id="compliance" step="1"></div>
         <div class="fld"><label for="vdvt">Dead-space fraction (Vd/Vt)</label><input type="number" id="vdvt" step="0.01" min="0" max="0.9" placeholder="0.30"></div>
+        <div class="fld"><label for="resistance">Airway resistance (cmH₂O/L/s)</label><input type="number" id="resistance" step="0.5" placeholder="~8, assumed if blank"></div>
+        <div class="fld"><label for="ti">Inspiratory time, Ti (s)</label><input type="number" id="ti" step="0.05" placeholder="assumed from I:E 1:2 if blank"></div>
       </div>
 
       <div class="subhead">What-if: simulate a parameter change</div>
       <div class="grid">
+        <div class="fld"><label for="simMode">Mode for this change</label>
+          <select id="simMode"><option value="VC">Volume control (set Vt)</option><option value="PC">Pressure control (set ΔP)</option></select></div>
         <div class="fld"><label for="simRR">New RR (bpm)</label><input type="number" id="simRR" step="1" placeholder="current"></div>
-        <div class="fld"><label for="simVt">New Vt (mL)</label><input type="number" id="simVt" step="10" placeholder="current"></div>
+        <div class="fld"><label for="simVt">New Vt (mL) — VC mode</label><input type="number" id="simVt" step="10" placeholder="current"></div>
+        <div class="fld"><label for="simDP">New driving pressure ΔP (cmH₂O) — PC mode</label><input type="number" id="simDP" step="1" placeholder="above PEEP"></div>
         <div class="fld"><label for="simFio2">New FiO₂ (%)</label><input type="number" id="simFio2" step="1" min="21" max="100" placeholder="current"></div>
         <div class="fld"><label for="simPeep">New PEEP (cmH₂O)</label><input type="number" id="simPeep" step="1" placeholder="current"></div>
+        <div class="fld"><label for="simPplat">New Pplateau, measured (cmH₂O)</label><input type="number" id="simPplat" step="1" placeholder="optional — for best-PEEP check"></div>
       </div>
       <div class="btns">
         <button type="button" id="ventSimBtn" class="go">Simulate change</button>
       </div>
-      <div id="ventSimOut" style="margin-top:12px"><p class="placeholder">Leave a field blank to keep it at its current value. Uses RR/Vt/FiO₂/PEEP/PaO₂/compliance/Vd·Vt from above, IBW for the protective-ventilation check, and pCO₂/HCO₃⁻ from the ABG form.</p></div>
+      <div id="ventSimOut" style="margin-top:12px"><p class="placeholder">Leave a field blank to keep it at its current value. Uses RR/Vt/FiO₂/PEEP/PaO₂/compliance/resistance/Ti/Vd·Vt from above, IBW for the protective-ventilation check, and pH/pCO₂/HCO₃⁻/Na⁺/Cl⁻/albumin/lactate from the ABG form. In PC mode, set the new driving pressure (ΔP) instead of Vt — Vt is derived from compliance/resistance/Ti. If you re-check the plateau pressure after a PEEP change, enter it to see whether compliance/driving pressure moved toward recruitment or overdistension.</p></div>
     </details>
 
     <div class="btns">
@@ -164,7 +170,110 @@
   </div>
   <div id="nephroOut" style="margin-top:14px"><p class="placeholder">Enter nephrology labs above and calculate. Uses Na⁺/K⁺/Cl⁻/albumin/lactate/pH/HCO₃⁻/glucose/BUN already entered in the ABG form, plus the fields here.</p></div>
 
-  <footer>Educational decision support based on a stepwise textbook method. Correlate clinically; not a substitute for judgement.</footer>
+  <hr>
+  <h3>Metabolic alkalosis management <span style="font-weight:400;font-size:.8rem;color:var(--muted)">— chloride/saline &amp; HCl dosing (Marino Ch.33)</span></h3>
+  <div class="grid">
+    <div class="fld"><label for="alkWeight">Weight (kg)</label><input type="number" id="alkWeight" step="1" placeholder="lean body weight"></div>
+  </div>
+  <div class="btns">
+    <button type="button" id="alkBtn" class="go">Calculate alkalosis therapy</button>
+  </div>
+  <div id="alkOut" style="margin-top:14px"><p class="placeholder">Analyze an ABG with an elevated HCO₃⁻ first. Uses HCO₃⁻/Cl⁻/pH from the ABG form and urine Cl⁻ from “Additional labs”, plus weight entered here.</p></div>
+
+  <hr>
+  <h3>Reference tables <span style="font-weight:400;font-size:.8rem;color:var(--muted)">— Marino, <i>The ICU Book</i> 5E, Ch.31 "Acid-Base Analysis"</span></h3>
+  <details>
+    <summary>Primary disorders &amp; compensatory responses (Table 31.1 / Fig. 31.2)</summary>
+    <div class="subhead">Primary disorders</div>
+    <table>
+      <thead><tr><th>Primary disorder</th><th>Primary change</th><th>Compensatory response</th></tr></thead>
+      <tbody>
+        <tr><td>Respiratory acidosis</td><td>↑ pCO₂</td><td>↑ HCO₃⁻</td></tr>
+        <tr><td>Respiratory alkalosis</td><td>↓ pCO₂</td><td>↓ HCO₃⁻</td></tr>
+        <tr><td>Metabolic acidosis</td><td>↓ HCO₃⁻</td><td>↓ pCO₂</td></tr>
+        <tr><td>Metabolic alkalosis</td><td>↑ HCO₃⁻</td><td>↑ pCO₂</td></tr>
+      </tbody>
+    </table>
+    <div class="subhead">Predictive equations for the secondary response</div>
+    <table>
+      <thead><tr><th>Disorder</th><th>Expected change</th></tr></thead>
+      <tbody>
+        <tr><td>Metabolic acidosis</td><td>Expected pCO₂ = 40 − [1.2 × (24 − current HCO₃⁻)]</td></tr>
+        <tr><td>Metabolic alkalosis</td><td>Expected pCO₂ = 40 + [0.7 × (current HCO₃⁻ − 24)]</td></tr>
+        <tr><td>Acute respiratory acidosis</td><td>Expected HCO₃⁻ = 24 + [0.1 × (current pCO₂ − 40)]</td></tr>
+        <tr><td>Chronic respiratory acidosis</td><td>Expected HCO₃⁻ = 24 + [0.4 × (current pCO₂ − 40)]</td></tr>
+        <tr><td>Acute respiratory alkalosis</td><td>Expected HCO₃⁻ = 24 − [0.2 × (40 − current pCO₂)]</td></tr>
+        <tr><td>Chronic respiratory alkalosis</td><td>Expected HCO₃⁻ = 24 − [0.4 × (40 − current pCO₂)]</td></tr>
+      </tbody>
+    </table>
+    <p class="placeholder" style="margin-top:8px">Renal (HCO₃⁻) compensation for a respiratory disorder takes 2–3 days to complete; acute vs. chronic equations bracket the expected HCO₃⁻ during that transition.</p>
+  </details>
+
+  <details>
+    <summary>The anion gap — determinants &amp; causes (Table 31.2 / 31.3)</summary>
+    <div class="subhead">Determinants of the anion gap (normal ≈ 12 mEq/L)</div>
+    <table>
+      <thead><tr><th>Unmeasured anions</th><th>~mEq/L</th><th>Unmeasured cations</th><th>~mEq/L</th></tr></thead>
+      <tbody>
+        <tr><td>Albumin</td><td>15</td><td>Calcium</td><td>5</td></tr>
+        <tr><td>Organic acids</td><td>5</td><td>Potassium</td><td>4.5</td></tr>
+        <tr><td>Phosphate</td><td>2</td><td>Magnesium</td><td>1.5</td></tr>
+        <tr><td>Sulfate</td><td>1</td><td></td><td></td></tr>
+        <tr><td><b>Total UA</b></td><td><b>23</b></td><td><b>Total UC</b></td><td><b>11</b></td></tr>
+      </tbody>
+    </table>
+    <div class="why">Albumin is the principal determinant of the AG (~2.5 mEq per g/dL). Hypoalbuminaemia (present in up to 90% of ICU patients) lowers the AG and can mask an unmeasured anion — hence the corrected AG: AGc = AG + [2.5 × (4.5 − albumin)].</div>
+    <div class="subhead">Causes of metabolic acidosis, by anion gap</div>
+    <table>
+      <thead><tr><th>High anion gap</th><th>Normal anion gap (hyperchloremic)</th></tr></thead>
+      <tbody>
+        <tr><td>L-lactic acid</td><td>Diarrhoea</td></tr>
+        <tr><td>D-lactic acid (short-bowel/gut bacterial overgrowth)</td><td>Isotonic saline infusion</td></tr>
+        <tr><td>Ketoacids (DKA, starvation, alcoholic)</td><td>Early renal insufficiency</td></tr>
+        <tr><td>Ethylene glycol (oxalic acid)</td><td>Renal tubular acidosis</td></tr>
+        <tr><td>Methanol (formic acid)</td><td>Acetazolamide</td></tr>
+        <tr><td>Pyroglutamic acid (5-oxoproline; chronic acetaminophen)</td><td>Ureteroenterostomy</td></tr>
+        <tr><td>Salicylate toxicity</td><td></td></tr>
+        <tr><td>Advanced renal failure</td><td></td></tr>
+      </tbody>
+    </table>
+    <p class="placeholder" style="margin-top:8px">D-lactic acidosis and 5-oxoproline (pyroglutamic acid) are easily missed high-AG causes — neither is captured by a routine (L-)lactate, and a formal D-lactate assay must be requested specifically.</p>
+  </details>
+
+  <details>
+    <summary>The delta gap &amp; osmolal gap (Eq. 31.16 / 31.17)</summary>
+    <div class="subhead">Delta gap (gap-gap)</div>
+    <p>AG excess / HCO₃⁻ deficit = (AG − 12) / (24 − HCO₃⁻)</p>
+    <ul class="rec">
+      <li>Ratio ≈ 1 — a pure high-AG metabolic acidosis.</li>
+      <li>Ratio &lt; 1 — the HCO₃⁻ fall exceeds the AG rise → co-existing <b>normal-AG (hyperchloremic)</b> acidosis (e.g. saline-diluted DKA).</li>
+      <li>Ratio &gt; 1 — the HCO₃⁻ fall is less than the AG rise → co-existing <b>metabolic alkalosis</b>.</li>
+    </ul>
+    <div class="subhead">Osmolal gap</div>
+    <p>Calculated Osm = 2 × Na⁺ + Glucose/18 + BUN/2.8 (+ Ethanol/3.7 if measured)</p>
+    <p class="placeholder">Normal osmolal gap (measured − calculated) is &lt; 10 mOsm/kg H₂O. An elevated gap in a high-AG acidosis, especially without a lactate or ketone explanation, suggests an occult unmeasured osmole — methanol, ethylene glycol, D-lactate, or pyroglutamic acid.</p>
+  </details>
+
+  <details>
+    <summary>Metabolic alkalosis — sources &amp; dosing (Table 33.1–33.3, Ch.33)</summary>
+    <div class="subhead">Principal sources, by extracellular volume &amp; urine chloride (Table 33.1)</div>
+    <table>
+      <thead><tr><th>ECV</th><th>Urine Cl⁻</th><th>Conditions</th></tr></thead>
+      <tbody>
+        <tr><td>Low</td><td>&lt; 20 mEq/L</td><td>Vomiting, NG suction, thiazide/loop diuretics (after-effect), laxative abuse</td></tr>
+        <tr><td>High</td><td>&gt; 20 mEq/L</td><td>Primary hyperaldosteronism, exogenous mineralocorticoids, licorice ingestion</td></tr>
+        <tr><td>Variable</td><td>Variable</td><td>K⁺ depletion, Mg²⁺ depletion</td></tr>
+      </tbody>
+    </table>
+    <div class="why">Low-ECV / low-urine-Cl⁻ ("chloride-sensitive") alkalosis is the usual ICU pattern and responds to saline + KCl; high-urine-Cl⁻ ("chloride-resistant") alkalosis does not — volume-loading is not the fix and the underlying mineralocorticoid excess must be treated.</div>
+    <div class="subhead">Saline dosing (Eq. 33.2/33.3)</div>
+    <p>Cl⁻ deficit (mEq) = 0.2 × wt (kg) × (100 − plasma Cl⁻) &nbsp;→&nbsp; Volume of isotonic saline (L) = Cl⁻ deficit ÷ 154</p>
+    <div class="subhead">Hydrochloric acid infusion, for severe alkalosis (HCO₃⁻ &gt; 50 mEq/L or pH &gt; 7.55) (Eq. 33.4)</div>
+    <p>H⁺ deficit (mEq) = 0.5 × wt (kg) × (plasma HCO₃⁻ − 24) &nbsp;→&nbsp; Volume of 0.1N HCl (L) = H⁺ deficit ÷ 100, via central vein, ≤0.2 mEq/kg/hr</p>
+    <p class="placeholder" style="margin-top:8px">Ventilatory compensation is sluggish: ΔpCO₂ = 0.7 × ΔHCO₃⁻ (Eq. 33.1, same as the metabolic-alkalosis row above) — hypercapnia (pCO₂ &gt; 46) needs the HCO₃⁻ to rise ~10 mEq/L, and worrisome hypercapnia (&gt; 50) only appears once the alkalosis is severe. Neurologic symptoms (confusion, seizures, carpopedal spasm) are classically taught for alkalosis but are usually a feature of <i>respiratory</i>, not metabolic, alkalosis. Check magnesium before/while replacing potassium — diuretic-induced hypokalemia can resist K⁺ replacement if Mg²⁺ is also depleted.</p>
+  </details>
+
+  <footer>Educational decision support based on a stepwise textbook method (Marino, <i>The ICU Book</i> 5E, Ch.31, Ch.33). Correlate clinically; not a substitute for judgement.</footer>
 </main>
 
 <script src="js/calculators.js"></script>
@@ -174,6 +283,7 @@
 <script src="js/patient.js"></script>
 <script src="js/export.js"></script>
 <script src="js/nephro.js"></script>
+<script src="js/alkalosis.js"></script>
 <script src="js/ventsim.js"></script>
 <script src="js/app.js"></script>
 </body>
