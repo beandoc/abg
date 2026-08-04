@@ -24,21 +24,73 @@ ABG.Interpreter = (function(){
       return {invalid:true, msg:`The pH, pCO₂ and HCO₃⁻ are internally inconsistent — the Henderson equation predicts [H⁺] ${f1(Hcalc)} (pH ${phFromHcalc.toFixed(2)}) but the entered pH implies [H⁺] ${f1(Hmeas)}, a ${pctDiff.toFixed(0)}% mismatch. Per the textbook method, repeat the electrolytes and ABG a few minutes apart before interpreting — this points to a pre-analytical or transcription error, not a real disorder.`};
     }
 
-    let primary, forcedMixed=null;
-    if(ph<7.35) primary = hco3<N_HCO3?'Metabolic acidosis':(pco2>N_PCO2?'Respiratory acidosis':'Acidemia (indeterminate)');
-    else if(ph>7.45) primary = hco3>N_HCO3?'Metabolic alkalosis':(pco2<N_PCO2?'Respiratory alkalosis':'Alkalemia (indeterminate)');
-    else {
-      if(hco3<N_HCO3 && ph<7.40) primary='Metabolic acidosis';
-      else if(pco2>N_PCO2 && ph<7.40) primary='Respiratory acidosis';
-      else if(hco3>N_HCO3 && ph>7.40) primary='Metabolic alkalosis';
-      else if(pco2<N_PCO2 && ph>7.40) primary='Respiratory alkalosis';
-      // Stage I, Rule 2 (Marino Ch.31): pH is normal but PaCO2/HCO3 is not — compensation
-      // never fully normalizes pH, so this can only be a mixed disorder, never a simple one.
-      else if(pco2>44){ primary='Respiratory acidosis'; forcedMixed='Metabolic alkalosis'; }
-      else if(pco2<36){ primary='Respiratory alkalosis'; forcedMixed='Metabolic acidosis'; }
-      else if(hco3>26){ primary='Metabolic alkalosis'; forcedMixed='Respiratory acidosis'; }
-      else if(hco3<22){ primary='Metabolic acidosis'; forcedMixed='Respiratory alkalosis'; }
-      else primary='Normal pH — inspect AG and compensation';
+    let primary = '', forcedMixed = null;
+    const isAcidemia = ph < 7.35;
+    const isAlkalemia = ph > 7.45;
+    const isNormalPH = !isAcidemia && !isAlkalemia;
+
+    const lowHCO3 = hco3 < 22;
+    const highHCO3 = hco3 > 26;
+    const lowPCO2 = pco2 < 35;
+    const highPCO2 = pco2 > 45;
+
+    const normHCO3 = hco3 >= 22 && hco3 <= 26;
+    const normPCO2 = pco2 >= 35 && pco2 <= 45;
+
+    if (isAcidemia) {
+      if (lowHCO3 && highPCO2) {
+        primary = 'Metabolic acidosis';
+      } else if (lowHCO3) {
+        primary = 'Metabolic acidosis';
+      } else if (highPCO2) {
+        primary = 'Respiratory acidosis';
+      } else {
+        const metDev = (24 - hco3) / 24;
+        const respDev = (pco2 - 40) / 40;
+        primary = metDev >= respDev ? 'Metabolic acidosis' : 'Respiratory acidosis';
+      }
+    } else if (isAlkalemia) {
+      if (highHCO3 && lowPCO2) {
+        const metDev = (hco3 - 24) / 24;
+        const respDev = (40 - pco2) / 40;
+        primary = metDev >= respDev ? 'Metabolic alkalosis' : 'Respiratory alkalosis';
+      } else if (highHCO3) {
+        primary = 'Metabolic alkalosis';
+      } else if (lowPCO2) {
+        primary = 'Respiratory alkalosis';
+      } else {
+        const metDev = (hco3 - 24) / 24;
+        const respDev = (40 - pco2) / 40;
+        if (respDev > metDev && pco2 < 40) primary = 'Respiratory alkalosis';
+        else if (metDev > respDev && hco3 > 24) primary = 'Metabolic alkalosis';
+        else primary = 'Alkalemia (indeterminate)';
+      }
+    } else {
+      // Normal pH (7.35 <= pH <= 7.45)
+      if (normHCO3 && normPCO2) {
+        primary = 'Normal acid–base status';
+      } else {
+        if (ph < 7.40) {
+          if (lowHCO3) primary = 'Metabolic acidosis';
+          else if (highPCO2) primary = 'Respiratory acidosis';
+          else if (hco3 < 24) primary = 'Metabolic acidosis';
+          else if (pco2 > 40) primary = 'Respiratory acidosis';
+          else primary = 'Normal acid–base status';
+        } else {
+          if (lowPCO2) primary = 'Respiratory alkalosis';
+          else if (highHCO3) primary = 'Metabolic alkalosis';
+          else if (pco2 < 40) primary = 'Respiratory alkalosis';
+          else if (hco3 > 24) primary = 'Metabolic alkalosis';
+          else primary = 'Normal acid–base status';
+        }
+
+        // Stage I, Rule 2 (Marino Ch.31): pH is normal but PaCO2/HCO3 is not — compensation
+        // never fully normalizes pH, so this can only be a mixed disorder, never a simple one.
+        if (highPCO2) forcedMixed = 'Metabolic alkalosis';
+        else if (lowPCO2) forcedMixed = 'Metabolic acidosis';
+        else if (highHCO3) forcedMixed = 'Respiratory acidosis';
+        else if (lowHCO3) forcedMixed = 'Respiratory alkalosis';
+      }
     }
     if(primary.includes('acidosis')||primary.includes('Acidemia')) dxClass='acid';
     else if(primary.includes('alkalosis')||primary.includes('Alkalemia')) dxClass='alk';
