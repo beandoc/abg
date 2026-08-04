@@ -73,9 +73,9 @@ ABG.PatientVault = (function(){
     const items = cases.map(c => {
       const p = c.patient || {};
       const name = p.name || 'Unidentified Patient';
-      const mrn = p.id ? `MRN ${p.id}` : '';
+      const hid = p.id ? `HID ${p.id}` : '';
       const bed = p.bed ? `Bed ${p.bed}` : '';
-      const meta = [mrn, bed, `${c.logs.length} logged ABGs`].filter(Boolean).join(' · ');
+      const meta = [hid, bed, `${c.logs.length} logged ABGs`].filter(Boolean).join(' · ');
       const dateStr = new Date(c.updatedAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
       return `

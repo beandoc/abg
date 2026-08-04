@@ -11,7 +11,7 @@ ABG.Patient = (function(){
   function summaryLabel(){
     const parts = [];
     if(current.name) parts.push(current.name);
-    if(current.id) parts.push(`MRN ${current.id}`);
+    if(current.id) parts.push(`HID ${current.id}`);
     if(current.bed) parts.push(`Bed ${current.bed}`);
     if(current.age!=null) parts.push(`${current.age}y`);
     if(current.sex) parts.push(current.sex);
