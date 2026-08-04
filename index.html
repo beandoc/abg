@@ -157,46 +157,56 @@
 
             <div class="card">
               <button type="button" class="card-summary" data-collapse="ventCard" aria-expanded="false">
-                <span>Ventilator / oxygenation</span>
+                <span>Ventilator &amp; Oxygenation Management</span>
                 <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
               <div class="card-body collapsible" id="ventCard">
+
+                <!-- 1. Baseline Ventilation & Patient Setup -->
+                <div class="subhead">1. Baseline Ventilation &amp; Patient Target</div>
                 <div class="row-grid">
-                  <div class="fld"><label for="ventMode">Mode</label>
+                  <div class="fld"><label for="ventMode">Ventilator Mode</label>
                     <select id="ventMode"><option value="Not Set">Not set</option>
                       <option>AC-VC</option><option>AC-PC</option><option>SIMV-VC</option>
                       <option>SIMV-PC</option><option>PS/CPAP</option><option>Spontaneous</option></select></div>
-                  <div class="fld"><label for="fio2">FiO₂ (%)</label><input type="number" id="fio2" step="1" min="21" max="100" placeholder="21"></div>
-                  <div class="fld"><label for="pao2">PaO₂ (mmHg)</label><input type="number" id="pao2" step="1" placeholder="A–a gradient"></div>
-                  <div class="fld"><label for="weight">IBW (kg)</label><input type="number" id="weight" step="1" placeholder="for mL/kg"></div>
-                  <div class="fld"><label for="tidalVolume">Vt (mL)</label><input type="number" id="tidalVolume" step="10"></div>
-                  <div class="fld"><label for="respRate">RR (bpm)</label><input type="number" id="respRate" step="1"></div>
-                  <div class="fld"><label for="peep">PEEP (cmH₂O)</label><input type="number" id="peep" step="1"></div>
+                  <div class="fld"><label for="weight">IBW (kg)</label><input type="number" id="weight" step="1" placeholder="Ideal Body Weight"></div>
+                  <div class="fld"><label for="tidalVolume">Tidal Volume, Vt (mL)</label><input type="number" id="tidalVolume" step="10" placeholder="e.g. 420"></div>
+                  <div class="fld"><label for="respRate">Resp. Rate, RR (bpm)</label><input type="number" id="respRate" step="1" placeholder="e.g. 18"></div>
                 </div>
 
-                <div class="subhead">Lung mechanics <em>optional — sharpens the simulation below</em></div>
+                <!-- 2. Oxygenation & Gas Exchange -->
+                <div class="subhead">2. Oxygenation &amp; Gas Exchange</div>
                 <div class="row-grid">
-                  <div class="fld"><label for="compliance">Compliance (mL/cmH₂O)</label><input type="number" id="compliance" step="1"></div>
-                  <div class="fld"><label for="vdvt">Dead-space fraction (Vd/Vt)</label><input type="number" id="vdvt" step="0.01" min="0" max="0.9" placeholder="0.30"></div>
-                  <div class="fld"><label for="resistance">Airway resistance</label><input type="number" id="resistance" step="0.5" placeholder="~8, assumed"></div>
-                  <div class="fld"><label for="ti">Insp. time, Ti (s)</label><input type="number" id="ti" step="0.05" placeholder="from I:E 1:2"></div>
+                  <div class="fld"><label for="fio2">FiO₂ (%)</label><input type="number" id="fio2" step="1" min="21" max="100" placeholder="e.g. 40"></div>
+                  <div class="fld"><label for="pao2">PaO₂ (mmHg)</label><input type="number" id="pao2" step="1" placeholder="arterial O₂"></div>
+                  <div class="fld"><label for="peep">PEEP (cmH₂O)</label><input type="number" id="peep" step="1" placeholder="e.g. 5"></div>
                 </div>
 
-                <div class="subhead">What-if: simulate a parameter change</div>
+                <!-- 3. Advanced Lung Mechanics (Optional) -->
+                <div class="subhead">3. Lung Mechanics <em>Optional — sharpens simulation precision</em></div>
                 <div class="row-grid">
-                  <div class="fld"><label for="simMode">Mode for this change</label>
+                  <div class="fld"><label for="compliance">Compliance (mL/cmH₂O)</label><input type="number" id="compliance" step="1" placeholder="e.g. 45"></div>
+                  <div class="fld"><label for="resistance">Airway Resistance</label><input type="number" id="resistance" step="0.5" placeholder="~8 (assumed)"></div>
+                  <div class="fld"><label for="vdvt">Dead-Space (Vd/Vt)</label><input type="number" id="vdvt" step="0.01" min="0" max="0.9" placeholder="0.30 (assumed)"></div>
+                  <div class="fld"><label for="ti">Insp. Time, Ti (s)</label><input type="number" id="ti" step="0.05" placeholder="from I:E 1:2"></div>
+                </div>
+
+                <!-- 4. What-If Parameter Change Simulator -->
+                <div class="subhead">4. What-If Simulator: Test Parameter Changes</div>
+                <div class="row-grid">
+                  <div class="fld"><label for="simMode">Control Target Mode</label>
                     <select id="simMode"><option value="VC">Volume control (set Vt)</option><option value="PC">Pressure control (set ΔP)</option></select></div>
-                  <div class="fld"><label for="simRR">New RR (bpm)</label><input type="number" id="simRR" step="1" placeholder="current"></div>
-                  <div class="fld"><label for="simVt">New Vt (mL) — VC</label><input type="number" id="simVt" step="10" placeholder="current"></div>
+                  <div class="fld"><label for="simRR">New RR (bpm)</label><input type="number" id="simRR" step="1" placeholder="leave blank = current"></div>
+                  <div class="fld"><label for="simVt">New Vt (mL) — VC</label><input type="number" id="simVt" step="10" placeholder="leave blank = current"></div>
                   <div class="fld"><label for="simDP">New ΔP (cmH₂O) — PC</label><input type="number" id="simDP" step="1" placeholder="above PEEP"></div>
-                  <div class="fld"><label for="simFio2">New FiO₂ (%)</label><input type="number" id="simFio2" step="1" min="21" max="100" placeholder="current"></div>
-                  <div class="fld"><label for="simPeep">New PEEP (cmH₂O)</label><input type="number" id="simPeep" step="1" placeholder="current"></div>
-                  <div class="fld"><label for="simPplat">New Pplateau, measured</label><input type="number" id="simPplat" step="1" placeholder="optional"></div>
+                  <div class="fld"><label for="simFio2">New FiO₂ (%)</label><input type="number" id="simFio2" step="1" min="21" max="100" placeholder="leave blank = current"></div>
+                  <div class="fld"><label for="simPeep">New PEEP (cmH₂O)</label><input type="number" id="simPeep" step="1" placeholder="leave blank = current"></div>
+                  <div class="fld"><label for="simPplat">New Pplateau (cmH₂O)</label><input type="number" id="simPplat" step="1" placeholder="measured plateau"></div>
                 </div>
                 <div class="btn-row">
-                  <button type="button" id="ventSimBtn" class="btn btn-secondary">Simulate change</button>
+                  <button type="button" id="ventSimBtn" class="btn btn-secondary">⚡ Run Ventilator Simulation</button>
                 </div>
-                <div id="ventSimOut" class="result-slot"><p class="placeholder">Leave a field blank to keep it at its current value. Uses RR/Vt/FiO₂/PEEP/PaO₂/compliance/resistance/Ti/Vd·Vt from above, IBW for the protective-ventilation check, and pH/pCO₂/HCO₃⁻/Na⁺/Cl⁻/albumin/lactate from the ABG form.</p></div>
+                <div id="ventSimOut" class="result-slot"><p class="placeholder">Enter current ventilator parameters above and click "Run Ventilator Simulation" to predict gas exchange &amp; mechanical changes.</p></div>
               </div>
             </div>
 
