@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const f1 = x => (Math.round(x*10)/10).toFixed(1);
 
   ABG.Davenport.init('#davenport');
+  if(ABG.Tutor && ABG.Tutor.init) ABG.Tutor.init();
 
   function collect(){
     return {
@@ -47,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     $('dx').innerHTML = `<div class="dx ${r.dxClass}">${r.integrated}<small>Primary: ${r.primary}</small></div>`;
     $('out').innerHTML = r.steps.map(s=>`<div class="step"><div class="h">${s.h}</div><div class="b">${s.b}</div></div>`).join('');
+
+    if(ABG.Tutor && ABG.Tutor.updateTutorView) ABG.Tutor.updateTutorView(r, d);
 
     const R = ABG.Interpreter.recommend(r, d.vent);
     $('rec').innerHTML = `<ul class="rec">${R.map(([c,t])=>`<li class="${c}">${t}</li>`).join('')}</ul>`;
