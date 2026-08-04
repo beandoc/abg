@@ -48,6 +48,15 @@ ABG.Tutor = (function(){
         ph: 7.30, pco2: 27, hco3: 12, na: 135, k: 3.6, cl: 99, lactate: 10.0, albumin: 2.9,
         bun: 16, glucose: 110, nPhosphate: 1.1
       }
+    },
+    case6: {
+      title: 'Case 6: Extreme Hypochloremic Metabolic Alkalosis & AKI (63M Metastatic NET)',
+      description: 'Severe persistent vomiting & diarrhea in pancreatic NET causing extreme Metabolic Alkalosis (pH 7.55, HCO3 60, Cl 52), High-AG Uremic Acidosis (cAG 30, Cr 6.1), Hypokalemia (2.4), and massive Chloride Deficit (697 mEq / 4.5L 0.9% NaCl).',
+      labs: {
+        patientName: 'Case 6 (63M)', patientAge: 63, patientSex: 'M', patientWeight: 72.6,
+        ph: 7.55, pco2: 69, hco3: 60, na: 137, k: 2.4, cl: 52, lactate: 1.8, albumin: 2.5,
+        bun: 85, glucose: 120, nCreatinine: 6.1
+      }
     }
   };
 
@@ -239,6 +248,7 @@ ABG.Tutor = (function(){
         <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case3')">Case 3: Linezolid Type B Acidosis</button>
         <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case4')">Case 4: COPD Exacerbation</button>
         <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case5')">Case 5: Warburg Effect (45F Cancer)</button>
+        <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case6')">Case 6: Severe Hypochloremic Alkalosis + AKI</button>
       </div>
     `;
 
