@@ -361,9 +361,20 @@ footer{text-align:center; margin:6px 0 10px; font-size:.76rem; color:var(--muted
 .vault-item-actions { display: flex; align-items: center; gap: 6px; }
 
 @media print{
+  /* The active tab's fadein starts at opacity:0. Chrome re-runs it while rendering the print
+     snapshot, so the whole Analyze tab printed blank. Freeze all motion for print. */
+  *{animation:none !important; transition:none !important;}
   body{background:#fff; padding:0;}
   .app{box-shadow:none; border:none; border-radius:0; max-width:100%; display:block;}
-  .app-bar, .tab-bar, form, .action-row, .card-summary + .collapsible:not(.open){display:none !important;}
+  .app-bar, .tab-bar, .action-row, .btn-row, .card-summary + .collapsible:not(.open){display:none !important;}
+  /* The form's input cards are chrome, but result slots inside it (the ventilator simulation)
+     belong in the report. app.js marks the card .print-keep once a result has rendered. */
+  form .card:not(.print-keep){display:none !important;}
+  .print-keep .row-grid, .print-keep .subhead{display:none !important;}
+  /* Needs to outrank the collapsed-card hide rule above, so keep the extra .card qualifier. */
+  .card.print-keep .card-summary + .collapsible{display:block !important;}
+  .print-keep .card-summary{display:block !important; background:none; border:none; padding:12px 16px 0; font-weight:700;}
+  .print-keep .card-summary .chev{display:none !important;}
   .tab-page{display:block !important;}
   .card{box-shadow:none; border:1px solid #ccc; break-inside:avoid;}
 }

@@ -196,7 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
       mode: $('simMode').value, dpSet: num('simDP')
     };
     const result = ABG.VentSim.simulate(current, target);
-    ABG.VentSim.render($('ventSimOut'), result);
+    const out = $('ventSimOut');
+    ABG.VentSim.render(out, result);
+    // Mark the card so the print stylesheet keeps this result slot while hiding the input chrome.
+    const card = out.closest('.card');
+    if(card) card.classList.toggle('print-keep', !result.error);
   }
 
   $('f').addEventListener('submit', e => { e.preventDefault(); run(false); });

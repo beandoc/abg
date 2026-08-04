@@ -193,7 +193,7 @@
                 </div>
 
                 <!-- 4. What-If Parameter Change Simulator -->
-                <div class="subhead">4. What-If Simulator: Test Parameter Changes</div>
+                <div class="subhead">4. What-If Simulator: Test Parameter Changes <em>Blank fields keep the current setting</em></div>
                 <div class="row-grid">
                   <div class="fld"><label for="simMode">Control Target Mode</label>
                     <select id="simMode"><option value="VC">Volume control (set Vt)</option><option value="PC">Pressure control (set ΔP)</option></select></div>
@@ -202,7 +202,7 @@
                   <div class="fld"><label for="simDP">New ΔP (cmH₂O) — PC</label><input type="number" id="simDP" step="1" placeholder="above PEEP"></div>
                   <div class="fld"><label for="simFio2">New FiO₂ (%)</label><input type="number" id="simFio2" step="1" min="21" max="100" placeholder="leave blank = current"></div>
                   <div class="fld"><label for="simPeep">New PEEP (cmH₂O)</label><input type="number" id="simPeep" step="1" placeholder="leave blank = current"></div>
-                  <div class="fld"><label for="simPplat">New Pplateau (cmH₂O)</label><input type="number" id="simPplat" step="1" placeholder="measured plateau"></div>
+                  <div class="fld"><label for="simPplat">Re-measured Pplat (cmH₂O)</label><input type="number" id="simPplat" step="1" placeholder="after the change" title="Plateau pressure measured on the ventilator after the new settings were applied. Used to recompute compliance; with a PEEP change it also drives the recruitment-vs-overdistension check."></div>
                 </div>
                 <div class="btn-row">
                   <button type="button" id="ventSimBtn" class="btn btn-secondary">⚡ Run Ventilator Simulation</button>

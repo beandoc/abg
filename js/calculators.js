@@ -45,9 +45,13 @@ ABG.Calculators = (function(){
 
   function urineAnionGap(uNa, uK, uCl){ return (uNa + uK) - uCl; }
 
+  // Alveolar gas equation at sea level (Patm 760, PH2O 47, R 0.8).
+  function alveolarPO2(pco2, fio2Pct){
+    return (fio2Pct / 100) * (760 - 47) - pco2 / 0.8;
+  }
+
   function aaGradient(pco2, fio2Pct, pao2){
-    const fio2 = fio2Pct / 100;
-    const PAO2 = fio2 * (760 - 47) - pco2 / 0.8;
+    const PAO2 = alveolarPO2(pco2, fio2Pct);
     return { PAO2, aa: PAO2 - pao2 };
   }
 
@@ -86,8 +90,19 @@ ABG.Calculators = (function(){
   function drivingPressure(pplat, peep){ return pplat - peep; }
   function staticCompliance(vt, pplat, peepTotal){ return vt / (pplat - peepTotal); }
   function pfRatio(pao2, fio2Pct){ return pao2 / (fio2Pct / 100); }
-  function mechanicalPower(rr, vtMl, pplat, dp){
-    return 0.098 * rr * (vtMl / 1000) * (pplat - dp / 2);
+  // Arterial/alveolar O2 ratio. Unlike the A-a difference, this stays roughly constant as
+  // FiO2 changes, so it is the safer basis for predicting PaO2 after an FiO2 adjustment.
+  function aAratio(pao2, PAO2){ return PAO2 > 0 ? pao2 / PAO2 : null; }
+  // Peak inspiratory pressure under constant (square-wave) flow: plateau plus the
+  // resistive drop across the airway/ETT.
+  function peakPressure(pplat, vtMl, tiSec, resistanceCmH2OPerLps){
+    if(!tiSec || resistanceCmH2OPerLps == null) return pplat;
+    return pplat + inspFlowLps(vtMl, tiSec) * resistanceCmH2OPerLps;
+  }
+  // Becher/Gattinoni surrogate: MP = 0.098 x RR x Vt x (Ppeak - dP/2). Passing the plateau
+  // rather than the peak pressure yields the elastic-only power (no resistive component).
+  function mechanicalPower(rr, vtMl, pTop, dp){
+    return 0.098 * rr * (vtMl / 1000) * (pTop - dp / 2);
   }
 
   // Single-compartment (Riggs) respiratory-mechanics model: passive exhalation is an
@@ -99,9 +114,14 @@ ABG.Calculators = (function(){
   function resistivePressure(flowLps, resistance){ return flowLps * resistance; }
   // Fraction of the inspired volume still trapped in the lung after expiratory time te.
   function retainedVolumeFraction(teSec, tau){ return tau > 0 ? Math.exp(-teSec / tau) : 0; }
+  // Steady-state (breath-stacking) trapped volume, not the single-breath residue: each breath
+  // starts from the volume left by the last one, so Vtrap converges on Vt.e^-x/(1-e^-x).
+  // The single-breath form understates auto-PEEP by ~58% at te = tau, i.e. exactly where it matters.
   function autoPeepEstimate(vtMl, complianceMlPerCmH2O, teSec, tau){
     const retained = retainedVolumeFraction(teSec, tau);
-    return (vtMl * retained) / complianceMlPerCmH2O; // cmH2O added above set PEEP
+    if(retained >= 0.995) return 200; // exhalation is effectively absent; caller clamps/warns
+    const trapped = vtMl * retained / (1 - retained);
+    return trapped / complianceMlPerCmH2O; // cmH2O above the set PEEP
   }
   // Pressure-control tidal volume for a step change in driving pressure, single-compartment
   // model with a decaying-flow (pressure-limited) inspiration: Vt = deltaP x C x (1 - e^-Ti/tau).
@@ -116,10 +136,10 @@ ABG.Calculators = (function(){
     metAcidExpectedPCO2, metAlkExpectedPCO2,
     respAcidAcuteHCO3, respAcidChronicHCO3, respAlkAcuteHCO3, respAlkChronicHCO3,
     anionGap, correctedAnionGap, deltaRatio,
-    calcOsm, osmolalGap, urineAnionGap, aaGradient, calcIBW, ibwPerKg,
+    calcOsm, osmolalGap, urineAnionGap, alveolarPO2, aaGradient, calcIBW, ibwPerKg,
     minuteVentilation, predictedPCO2FromVE, alveolarVentilation, acuteHCO3Shift,
     clDeficit, salineVolumeL, hPlusDeficit, hclVolumeL,
-    plateauPressure, drivingPressure, staticCompliance, pfRatio, mechanicalPower,
+    plateauPressure, drivingPressure, staticCompliance, pfRatio, aAratio, peakPressure, mechanicalPower,
     timeConstant, inspFlowLps, resistivePressure, retainedVolumeFraction, autoPeepEstimate, pcTidalVolume
   };
 })();
