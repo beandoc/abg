@@ -31,6 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
     ABG.Davenport.draw(null, ABG.Trend.log);
   }
 
+  function autoSaveSession(){
+    collectPatient();
+    const patientInfo = ABG.Patient.get();
+    const d = collect();
+    if(patientInfo.name || patientInfo.id || ABG.Trend.log.length > 0){
+      ABG.PatientVault.saveCurrentCase(patientInfo, ABG.Trend.log, d);
+    }
+  }
+
   function run(logIt){
     collectPatient();
     const d = collect();
@@ -62,16 +71,86 @@ document.addEventListener('DOMContentLoaded', () => {
     if(r.disorders.some(x=>x.toLowerCase().includes('metabolic alkalosis'))){
       const wrap = document.createElement('div');
       ABG.Alkalosis.render(wrap, { hco3:d.hco3, cl:d.cl, ph:d.ph, uCl:d.uCl, weight:num('patientWeight') });
-      $('rec').innerHTML += `<div class="subhead">Chloride/HCl dosing (Marino Ch.33)</div>${wrap.innerHTML}`;
+      $('rec').innerHTML += `<div class="subhead">Chloride/HCl dosing</div>${wrap.innerHTML}`;
     }
 
     lastAnalysis = { d, r };
 
     if(logIt){
       ABG.Trend.add({ph:d.ph,pco2:d.pco2,hco3:d.hco3,lactate:d.lactate,ag:r.cAG,dx:r.integrated,t:new Date()});
+      autoSaveSession();
     }
     ABG.Trend.render($('trend'), renderTrend);
     ABG.Davenport.draw({ph:d.ph,hco3:d.hco3,pco2:d.pco2,integrated:r.integrated}, ABG.Trend.log);
+  }
+
+  function populateForm(d){
+    if(!d) return;
+    const setVal = (id, val) => { const el=$(id); if(el) el.value = (val!=null ? val : ''); };
+    setVal('ph', d.ph); setVal('pco2', d.pco2); setVal('hco3', d.hco3);
+    setVal('na', d.na); setVal('k', d.k); setVal('cl', d.cl);
+    setVal('lactate', d.lactate); setVal('albumin', d.albumin);
+    setVal('bun', d.bun); setVal('glucose', d.glucose);
+    setVal('measuredOsm', d.measuredOsm); setVal('ethanol', d.ethanol);
+    setVal('uNa', d.uNa); setVal('uK', d.uK); setVal('uCl', d.uCl);
+    if(d.vent){
+      setVal('ventMode', d.vent.mode || 'Not Set');
+      setVal('fio2', d.vent.fio2); setVal('pao2', d.vent.pao2);
+      setVal('weight', d.vent.weight); setVal('tidalVolume', d.vent.tidalVolume);
+      setVal('respRate', d.vent.respRate); setVal('peep', d.vent.peep);
+    }
+  }
+
+  function loadCaseRecord(caseId){
+    const record = ABG.PatientVault.loadCase(caseId);
+    if(!record) return;
+
+    // Restore Patient Info
+    const p = record.patient || {};
+    $('patientName').value = p.name || '';
+    $('patientId').value = p.id || '';
+    $('patientBed').value = p.bed || '';
+    $('patientAge').value = p.age != null ? p.age : '';
+    $('patientSex').value = p.sex || '';
+    $('patientWeight').value = p.weight != null ? p.weight : '';
+    ABG.Patient.set(p);
+
+    // Restore Trend Log
+    ABG.Trend.clear();
+    if(record.logs && record.logs.length){
+      record.logs.forEach(l => ABG.Trend.add(l));
+    }
+
+    // Restore Form Data
+    if(record.form){
+      populateForm(record.form);
+    }
+
+    closeVault();
+    run(false);
+  }
+
+  function openVault(){
+    const modal = $('vaultModal');
+    const backdrop = $('vaultBackdrop');
+    const body = $('vaultModalBody');
+    if(!modal || !backdrop || !body) return;
+
+    ABG.PatientVault.renderVaultModal(body, (selectedId) => {
+      loadCaseRecord(selectedId);
+    }, () => {
+      renderTrend();
+    });
+
+    modal.classList.add('open');
+    backdrop.classList.add('open');
+  }
+
+  function closeVault(){
+    const modal = $('vaultModal');
+    const backdrop = $('vaultBackdrop');
+    if(modal) modal.classList.remove('open');
+    if(backdrop) backdrop.classList.remove('open');
   }
 
   function runNephro(){
@@ -109,6 +188,21 @@ document.addEventListener('DOMContentLoaded', () => {
     ABG.Trend.clear();
     renderTrend();
   });
+
+  const saveBtn = $('saveCaseBtn');
+  if(saveBtn) saveBtn.addEventListener('click', () => {
+    autoSaveSession();
+    alert('Patient case record saved successfully.');
+  });
+
+  const openVaultBtn = $('openVaultBtn');
+  if(openVaultBtn) openVaultBtn.addEventListener('click', openVault);
+
+  const vaultCloseBtn = $('vaultCloseBtn');
+  if(vaultCloseBtn) vaultCloseBtn.addEventListener('click', closeVault);
+
+  const vaultBackdrop = $('vaultBackdrop');
+  if(vaultBackdrop) vaultBackdrop.addEventListener('click', closeVault);
 
   $('nephroBtn').addEventListener('click', runNephro);
   $('ventSimBtn').addEventListener('click', runVentSim);

@@ -101,18 +101,22 @@
         <div class="split-col split-col-left">
           <div class="card">
             <button type="button" class="card-summary" data-collapse="patientCard" aria-expanded="false">
-              <span>Patient</span>
+              <span>Patient Details &amp; Records</span>
               <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="card-body collapsible" id="patientCard">
               <div class="row-grid">
-                <div class="fld"><label for="patientName">Name</label><input type="text" id="patientName" placeholder="optional"></div>
-                <div class="fld"><label for="patientId">MRN / ID</label><input type="text" id="patientId" placeholder="optional"></div>
-                <div class="fld"><label for="patientBed">Bed / location</label><input type="text" id="patientBed" placeholder="optional"></div>
+                <div class="fld"><label for="patientName">Name</label><input type="text" id="patientName" placeholder="e.g. John Doe"></div>
+                <div class="fld"><label for="patientId">MRN / ID</label><input type="text" id="patientId" placeholder="e.g. 982314"></div>
+                <div class="fld"><label for="patientBed">Bed / location</label><input type="text" id="patientBed" placeholder="e.g. ICU-04"></div>
                 <div class="fld"><label for="patientAge">Age</label><input type="number" id="patientAge" step="1" placeholder="years"></div>
                 <div class="fld"><label for="patientSex">Sex</label>
                   <select id="patientSex"><option value="">—</option><option value="M">Male</option><option value="F">Female</option></select></div>
-                <div class="fld"><label for="patientWeight">Weight (kg)</label><input type="number" id="patientWeight" step="0.1" placeholder="sharpens dosing"></div>
+                <div class="fld"><label for="patientWeight">Weight (kg)</label><input type="number" id="patientWeight" step="0.1" placeholder="dosing weight"></div>
+              </div>
+              <div class="btn-row" style="margin-top:12px;">
+                <button type="button" id="saveCaseBtn" class="btn btn-secondary btn-sm" title="Save current patient session to memory">💾 Save Case</button>
+                <button type="button" id="openVaultBtn" class="btn btn-secondary btn-sm" title="Recall past saved patient cases">📁 Saved Cases</button>
               </div>
             </div>
           </div>
@@ -466,11 +470,21 @@
 
 </div>
 
+<div class="vault-backdrop" id="vaultBackdrop"></div>
+<div class="vault-modal" id="vaultModal">
+  <div class="vault-modal-header">
+    <div class="vault-modal-title">📁 Saved Patient Case Records</div>
+    <button type="button" class="vault-close-btn" id="vaultCloseBtn">&times;</button>
+  </div>
+  <div class="vault-modal-body" id="vaultModalBody"></div>
+</div>
+
 <script src="js/calculators.js"></script>
 <script src="js/interpreter.js"></script>
 <script src="js/davenport.js"></script>
 <script src="js/trend.js"></script>
 <script src="js/patient.js"></script>
+<script src="js/patientVault.js"></script>
 <script src="js/export.js"></script>
 <script src="js/nephro.js"></script>
 <script src="js/alkalosis.js"></script>

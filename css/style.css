@@ -298,15 +298,60 @@ footer{text-align:center; margin:6px 0 10px; font-size:.76rem; color:var(--muted
 .type-d{background:var(--alk-bg); color:var(--alk-ink);}
 .node-desc{font-size:.83rem; color:#3A3A3C; line-height:1.5;}
 
-.goldmark-card{background:#F8F9FB; border:1px solid var(--line); border-radius:13px; padding:14px 15px; margin-top:14px;}
-.goldmark-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:8px; margin-top:8px;}
-.gm-item{display:flex; gap:10px; background:#fff; border:1px solid var(--line); border-radius:11px; padding:9px 11px;
-  cursor:pointer; transition:border-color .15s, background .15s;}
-.gm-item:hover{border-color:var(--accent); background:var(--accent-bg);}
-.gm-letter{font-weight:800; font-size:1rem; color:var(--accent-dk); background:var(--accent-bg);
-  width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:8px; flex-shrink:0;}
-.gm-title{font-weight:700; font-size:.82rem; color:var(--ink);}
-.gm-detail{font-size:.76rem; color:var(--muted); margin-top:2px; line-height:1.45;}
+.btn-sm { padding: 6px 12px; font-size: 0.78rem; border-radius: 8px; }
+
+/* ---- Patient Vault Modal ---- */
+.vault-backdrop {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  z-index: 300; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.vault-backdrop.open { opacity: 1; pointer-events: auto; }
+
+.vault-modal {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -48%) scale(0.96);
+  width: 520px; max-width: 92vw; max-height: 80vh;
+  background: #FFFFFF; z-index: 301; border-radius: 20px;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.22);
+  opacity: 0; pointer-events: none;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+}
+.vault-modal.open {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1; pointer-events: auto;
+}
+
+.vault-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; border-bottom: 1px solid var(--line);
+  background: #F8FAFC;
+}
+.vault-modal-title { font-weight: 800; font-size: 0.98rem; color: var(--ink); }
+.vault-close-btn {
+  width: 30px; height: 30px; border-radius: 50%; border: none;
+  background: rgba(120, 120, 128, 0.12); color: var(--ink);
+  font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.vault-close-btn:active { background: rgba(120, 120, 128, 0.22); }
+
+.vault-modal-body { padding: 14px 16px; overflow-y: auto; max-height: 65vh; }
+.vault-list { display: flex; flex-direction: column; gap: 10px; }
+
+.vault-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; background: #F8FAFC; border: 1px solid var(--line);
+  border-radius: 12px; transition: border-color 0.15s ease, background 0.15s ease;
+}
+.vault-item:hover { border-color: var(--accent); background: #F0FDF4; }
+.vault-item-info { display: flex; flex-direction: column; gap: 2px; }
+.vault-item-title { font-weight: 700; font-size: 0.92rem; color: var(--ink); }
+.vault-item-meta { font-size: 0.78rem; color: var(--accent-dk); font-weight: 600; }
+.vault-item-date { font-size: 0.72rem; color: var(--muted); }
+.vault-item-actions { display: flex; align-items: center; gap: 6px; }
 
 @media print{
   body{background:#fff; padding:0;}
