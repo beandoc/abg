@@ -237,24 +237,6 @@ ABG.Tutor = (function(){
     const main = document.querySelector('main');
     if(!main) return;
 
-    // Insert Presets Bar at top
-    const presetsDiv = document.createElement('div');
-    presetsDiv.className = 'presets-card';
-    presetsDiv.innerHTML = `
-      <div class="subhead" style="margin-top:0; margin-bottom:6px;">🎓 Interactive Clinical Case Library (Preset Scenarios)</div>
-      <div class="preset-btns">
-        <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case1')">Case 1: Sepsis & DKA</button>
-        <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case2')">Case 2: Aspirin Toxicity + Vent Trap</button>
-        <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case3')">Case 3: Linezolid Type B Acidosis</button>
-        <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case4')">Case 4: COPD Exacerbation</button>
-        <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case5')">Case 5: Warburg Effect (45F Cancer)</button>
-        <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case6')">Case 6: Severe Hypochloremic Alkalosis + AKI</button>
-      </div>
-    `;
-
-    const details = main.querySelector('details');
-    if(details) main.insertBefore(presetsDiv, details);
-
     // Add containers for gauges and tutor views
     const outDiv = document.getElementById('out');
     if(outDiv){
