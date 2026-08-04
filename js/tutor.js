@@ -10,7 +10,7 @@ ABG.Tutor = (function(){
       labs: {
         patientName: 'Case 1 (72M)', patientAge: 72, patientSex: 'M', patientWeight: 70,
         ph: 7.22, pco2: 24, hco3: 10, na: 131, k: 3.5, cl: 102, lactate: 1.7, albumin: 2.5,
-        bun: 48, glucose: 240, measuredOsm: 310, ethanol: 0
+        bun: 48, glucose: 240, measuredOsm: 310
       }
     },
     case2: {
@@ -19,7 +19,7 @@ ABG.Tutor = (function(){
       labs: {
         patientName: 'Case 2 (55F)', patientAge: 55, patientSex: 'F', patientWeight: 62,
         ph: 7.17, pco2: 37, hco3: 10, na: 147, k: 4.2, cl: 115, lactate: 1.6, albumin: 4.0,
-        bun: 28, glucose: 130, measuredOsm: 317, ethanol: 0
+        bun: 28, glucose: 130, measuredOsm: 317
       }
     },
     case3: {
@@ -28,7 +28,7 @@ ABG.Tutor = (function(){
       labs: {
         patientName: 'Case 3 (41F)', patientAge: 41, patientSex: 'F', patientWeight: 58,
         ph: 7.16, pco2: 35, hco3: 12, na: 146, k: 3.8, cl: 105, lactate: 12.2, albumin: 4.0,
-        bun: 18, glucose: 105, measuredOsm: 295, ethanol: 0
+        bun: 18, glucose: 105, measuredOsm: 295
       }
     },
     case4: {

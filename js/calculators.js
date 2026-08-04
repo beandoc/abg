@@ -38,10 +38,8 @@ ABG.Calculators = (function(){
     return { dAG, dHCO3, ratio: dHCO3 > 0 ? dAG / dHCO3 : null };
   }
 
-  function calcOsm(na, glucose, bun, ethanol){
-    let osm = 2 * na + glucose / 18 + bun / 2.8;
-    if (ethanol != null) osm += ethanol / 3.7;
-    return osm;
+  function calcOsm(na, glucose, bun){
+    return 2 * na + glucose / 18 + bun / 2.8;
   }
   function osmolalGap(measured, calc){ return measured - calc; }
 

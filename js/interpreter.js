@@ -7,7 +7,7 @@ ABG.Interpreter = (function(){
   const f1 = x => (Math.round(x*10)/10).toFixed(1);
 
   function analyze(d){
-    const {ph,pco2,hco3,na,k,cl,lactate,albumin,bun,glucose,measuredOsm,ethanol,uNa,uK,uCl,vent}=d;
+    const {ph,pco2,hco3,na,k,cl,lactate,albumin,bun,glucose,measuredOsm,uNa,uK,uCl,vent}=d;
     const steps=[]; let dxClass='';
     const S=(h,b)=>steps.push({h,b});
 
@@ -201,8 +201,8 @@ ABG.Interpreter = (function(){
     }
 
     if(na!==null&&glucose!==null&&bun!==null){
-      let calcOsm=C.calcOsm(na,glucose,bun,ethanol);
-      let line=`Calculated osmolality = <span class="val">${f1(calcOsm)}</span> mOsm/kg${ethanol!==null?' (ethanol included)':''}.`;
+      let calcOsm=C.calcOsm(na,glucose,bun);
+      let line=`Calculated osmolality = <span class="val">${f1(calcOsm)}</span> mOsm/kg.`;
       if(measuredOsm!==null){
         const og=C.osmolalGap(measuredOsm,calcOsm);
         line+=` Osmolal gap = <span class="val">${f1(og)}</span> (normal &lt; 10 mOsm/kg H₂O).`;

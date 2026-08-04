@@ -146,7 +146,7 @@ ABG.VentSim = (function(){
         ph: phNew, pco2: pco2New, hco3: hco3New,
         na: current.na!=null?current.na:null, k: null, cl: current.cl!=null?current.cl:null,
         lactate: current.lactate!=null?current.lactate:null, albumin: current.albumin!=null?current.albumin:null,
-        bun: null, glucose: null, measuredOsm: null, ethanol: null, uNa: null, uK: null, uCl: null,
+        bun: null, glucose: null, measuredOsm: null, uNa: null, uK: null, uCl: null,
         vent: { pao2: pao2New, fio2: fio2New }
       });
       if(!analyzed.invalid) predictedDx = analyzed;

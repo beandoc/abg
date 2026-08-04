@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return {
       ph:num('ph'),pco2:num('pco2'),hco3:num('hco3'),na:num('na'),k:num('k'),cl:num('cl'),
       lactate:num('lactate'),albumin:num('albumin'),bun:num('bun'),glucose:num('glucose'),
-      measuredOsm:num('measuredOsm'),ethanol:num('ethanol'),uNa:num('uNa'),uK:num('uK'),uCl:num('uCl'),
+      measuredOsm:num('measuredOsm'),uNa:num('uNa'),uK:num('uK'),uCl:num('uCl'),
       vent:{mode:$('ventMode').value,fio2:num('fio2'),pao2:num('pao2'),weight:num('weight'),
             tidalVolume:num('tidalVolume'),respRate:num('respRate'),peep:num('peep')}
     };
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setVal('na', d.na); setVal('k', d.k); setVal('cl', d.cl);
     setVal('lactate', d.lactate); setVal('albumin', d.albumin);
     setVal('bun', d.bun); setVal('glucose', d.glucose);
-    setVal('measuredOsm', d.measuredOsm); setVal('ethanol', d.ethanol);
+    setVal('measuredOsm', d.measuredOsm);
     setVal('uNa', d.uNa); setVal('uK', d.uK); setVal('uCl', d.uCl);
     if(d.vent){
       setVal('ventMode', d.vent.mode || 'Not Set');
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function runNephro(){
     const d = lastAnalysis ? lastAnalysis.d : collect();
     let calcOsm = null;
-    if(d.na!=null && d.glucose!=null && d.bun!=null) calcOsm = ABG.Calculators.calcOsm(d.na, d.glucose, d.bun, d.ethanol);
+    if(d.na!=null && d.glucose!=null && d.bun!=null) calcOsm = ABG.Calculators.calcOsm(d.na, d.glucose, d.bun);
     ABG.Nephro.render($('nephroOut'), {
       ph:d.ph, pco2:d.pco2, hco3:d.hco3, na:d.na, k:d.k, cl:d.cl, lactate:d.lactate,
       albumin:d.albumin, bun:d.bun, glucose:d.glucose, calcOsm

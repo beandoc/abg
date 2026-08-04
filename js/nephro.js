@@ -106,7 +106,7 @@ ABG.Nephro = (function(){
     if(cCa!=null) row('Corrected calcium', f1(cCa), 'mg/dL', 'Corrects total calcium for hypoalbuminaemia (+0.8 mg/dL per 1 g/dL albumin below 4.0).');
 
     const effOsm = effectiveOsm(abgVals.na, abgVals.glucose);
-    if(effOsm!=null) row('Effective osmolality', f1(effOsm), 'mOsm/kg', 'Tonicity-relevant osmolality — excludes urea/ethanol, which cross membranes freely.');
+    if(effOsm!=null) row('Effective osmolality', f1(effOsm), 'mOsm/kg', 'Tonicity-relevant osmolality — excludes urea, which crosses membranes freely.');
 
     const cNa = correctedSodium(abgVals.na, abgVals.glucose);
     if(cNa!=null && abgVals.glucose>100) row('Corrected sodium (for hyperglycaemia)', f1(cNa), 'mEq/L', 'Katz correction: +1.6 mEq/L per 100 mg/dL glucose above 100.');
