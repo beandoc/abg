@@ -23,16 +23,16 @@ ABG.Davenport = (function(){
 
   function palette(){
     return dark
-      ? { bg:'#0f1a22', bg2:'#0c161d', grid:'rgba(220,230,235,.14)', axis:'#a9bac3', text:'#e7edf0',
+      ? { bg:'#0e1a1a', bg2:'#0a1414', grid:'rgba(220,230,235,.14)', axis:'#a4bcb6', text:'#e7edf0',
           normalFill:'rgba(90,195,150,.20)', normalLine:'rgba(130,220,180,.75)',
-          isobar:'rgba(205,218,227,.42)', isobarLbl:'rgba(215,226,233,.8)', buffer:'rgba(238,196,96,.85)',
-          trendLine:'rgba(238,196,96,.9)', patient:'#f0808f', patientRing:'#0f1a22',
+          isobar:'rgba(205,218,227,.42)', isobarLbl:'rgba(215,226,233,.8)', buffer:'rgba(163,180,177,.6)',
+          trendLine:'rgba(230,167,66,.9)', patient:'#e6a742', patientRing:'#0e1a1a',
           shadow:'rgba(0,0,0,.55)', cardBorder:'rgba(220,230,235,.12)' }
-      : { bg:'#ffffff', bg2:'#fbfdfe', grid:'#e9eff2', axis:'#4c5c68', text:'#16232e',
+      : { bg:'#ffffff', bg2:'#fbfdfb', grid:'#e6eeec', axis:'#4c625e', text:'#16262a',
           normalFill:'rgba(47,107,79,.12)', normalLine:'rgba(47,107,79,.6)',
-          isobar:'rgba(120,135,145,.45)', isobarLbl:'rgba(91,107,120,.9)', buffer:'rgba(150,100,0,.75)',
-          trendLine:'rgba(150,100,0,.85)', patient:'#b23a48', patientRing:'#ffffff',
-          shadow:'rgba(22,35,46,.18)', cardBorder:'rgba(22,35,46,.08)' };
+          isobar:'rgba(120,135,132,.45)', isobarLbl:'rgba(91,110,112,.9)', buffer:'rgba(60,80,84,.5)',
+          trendLine:'rgba(184,121,14,.85)', patient:'#b8790e', patientRing:'#ffffff',
+          shadow:'rgba(22,38,42,.18)', cardBorder:'rgba(22,38,42,.08)' };
   }
 
   function pointInPolygon(pt, poly){
@@ -114,23 +114,24 @@ ABG.Davenport = (function(){
       const style = document.createElement('style');
       style.id = 'dv-style';
       style.textContent = `
-        .dv-card{background:var(--paper,#fff); border:1px solid var(--line,#dbe3e8); border-radius:12px;
-          padding:14px 14px 12px; box-shadow:0 1px 2px rgba(20,40,60,.04), 0 8px 24px rgba(20,40,60,.06);}
+        .dv-card{background:var(--paper,#fff); border:1px solid var(--line,#c9d6d3); border-radius:2px;
+          padding:14px 14px 12px; box-shadow:0 1px 0 var(--line,#c9d6d3);}
         .dv-toolbar{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;}
-        .dv-toolbar-group{display:flex; gap:3px; background:rgba(120,140,150,.08); padding:3px; border-radius:8px;}
-        .dv-btn{padding:5px 10px; font-size:.8rem; border:none; border-radius:6px; background:transparent;
-          color:var(--muted,#5b6b78); cursor:pointer; transition:background .15s,color .15s; line-height:1.3;}
-        .dv-btn:hover{background:var(--paper,#fff); color:var(--accent-dk,#084d66); box-shadow:0 1px 3px rgba(20,40,60,.12);}
+        .dv-toolbar-group{display:flex; gap:3px; background:rgba(20,99,86,.06); padding:3px; border-radius:2px;}
+        .dv-btn{padding:5px 10px; font-size:.72rem; font-weight:700; letter-spacing:.02em; text-transform:uppercase;
+          font-family:var(--mono,monospace); border:none; border-radius:1px; background:transparent;
+          color:var(--muted,#5c6e70); cursor:pointer; transition:background .15s,color .15s; line-height:1.3;}
+        .dv-btn:hover{background:var(--paper,#fff); color:var(--accent-dk,#0c4a3f); box-shadow:0 1px 3px rgba(16,38,42,.12);}
         .dv-btn:active{transform:translateY(1px);}
         .dv-wrap{position:relative; width:100%; height:420px;}
-        .dv-wrap svg{width:100%; height:100%; border-radius:8px; display:block;}
-        .dv-tooltip{position:absolute; pointer-events:none; background:rgba(15,23,30,.94); color:#fff;
-          font-size:.78rem; line-height:1.4; padding:7px 10px; border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,.25);
-          transform:translate(-50%,-118%); white-space:nowrap; z-index:5;}
+        .dv-wrap svg{width:100%; height:100%; border-radius:2px; display:block;}
+        .dv-tooltip{position:absolute; pointer-events:none; background:rgba(14,26,26,.94); color:#fff;
+          font-family:var(--mono,monospace); font-size:.74rem; line-height:1.4; padding:7px 10px; border-radius:2px;
+          box-shadow:0 4px 14px rgba(0,0,0,.25); transform:translate(-50%,-118%); white-space:nowrap; z-index:5;}
         .dv-legend{display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:12px; padding-top:11px;
-          border-top:1px solid var(--line,#e3ebef);}
-        .dv-legend-item{display:flex; align-items:center; gap:6px; font-size:.76rem; color:var(--muted,#5b6b78);}
-        .dv-legend-swatch{width:13px; height:13px; border-radius:3px; flex:none; box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);}
+          border-top:1px solid var(--line,#c9d6d3);}
+        .dv-legend-item{display:flex; align-items:center; gap:6px; font-size:.74rem; color:var(--muted,#5c6e70); font-family:var(--mono,monospace);}
+        .dv-legend-swatch{width:13px; height:13px; border-radius:1px; flex:none; box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);}
         .dv-legend-line{width:16px; height:0; border-top-width:2px; border-top-style:solid; flex:none;}
         .dv-legend-dot{width:9px; height:9px; border-radius:50%; flex:none; box-shadow:0 0 0 1.5px rgba(0,0,0,.1);}
       `;
@@ -180,11 +181,11 @@ ABG.Davenport = (function(){
     const lineShadow = defs.append('filter').attr('id','dv-line-shadow').attr('x','-20%').attr('y','-20%').attr('width','140%').attr('height','140%');
     lineShadow.append('feDropShadow').attr('dx',0).attr('dy',0.75).attr('stdDeviation',0.9).attr('flood-color', pal.shadow).attr('flood-opacity',.7);
     const clip = defs.append('clipPath').attr('id','dv-clip');
-    clip.append('rect').attr('width', width).attr('height', height).attr('rx', 9);
+    clip.append('rect').attr('width', width).attr('height', height).attr('rx', 3);
 
     const root = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
-    root.append('rect').attr('class','dv-bg').attr('width', width).attr('height', height).attr('rx', 9)
+    root.append('rect').attr('class','dv-bg').attr('width', width).attr('height', height).attr('rx', 3)
       .attr('fill', 'url(#dv-bg-grad)').attr('stroke', pal.cardBorder);
 
     // Axes/gridlines stay UNCLIPPED so tick labels (which sit just outside the plot
@@ -353,8 +354,8 @@ ABG.Davenport = (function(){
 
   function buildLegend(pal){
     if(!legendEl) return;
-    const acidFill = 'rgba(178,58,72,0.14)', acidLine = 'rgba(178,58,72,0.55)';
-    const alkFill  = 'rgba(47,107,79,0.14)',  alkLine  = 'rgba(47,107,79,0.55)';
+    const acidFill = 'rgba(163,36,28,0.14)', acidLine = 'rgba(163,36,28,0.55)';
+    const alkFill  = 'rgba(29,78,137,0.14)',  alkLine  = 'rgba(29,78,137,0.55)';
     const items = [
       { type:'swatch', fill:acidFill, line:acidLine, label:'Acidosis bands' },
       { type:'swatch', fill:alkFill,  line:alkLine,  label:'Alkalosis bands' },

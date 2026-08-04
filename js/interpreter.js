@@ -178,7 +178,7 @@ ABG.Interpreter = (function(){
     if(forcedMixed && !disorders.some(x=>x.toLowerCase().includes(forcedMixed.toLowerCase()))){
       disorders.push(forcedMixed);
       S('Step 6b · Normal pH with a deranged PaCO₂/HCO₃⁻',
-        `pH ${ph.toFixed(2)} is within the normal range despite an abnormal ${primary.includes('Respiratory')?'PaCO₂':'HCO₃⁻'} — compensation limits but never fully normalizes pH (Marino Ch.31), so a normal pH here proves a second, offsetting disorder: <b>${forcedMixed}</b>.`);
+        `pH ${ph.toFixed(2)} is within the normal range despite an abnormal ${primary.includes('Respiratory')?'PaCO₂':'HCO₃⁻'} — compensation limits but never fully normalizes pH, so a normal pH here proves a second, offsetting disorder: <b>${forcedMixed}</b>.`);
     }
 
     if(highAG && primary==='Metabolic acidosis'){
