@@ -97,127 +97,131 @@
 
     <!-- ============ TAB: ANALYZE ============ -->
     <section class="tab-page active" data-tab="analyze">
+      <div class="responsive-split">
+        <div class="split-col split-col-left">
+          <div class="card">
+            <button type="button" class="card-summary" data-collapse="patientCard" aria-expanded="false">
+              <span>Patient</span>
+              <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="card-body collapsible" id="patientCard">
+              <div class="row-grid">
+                <div class="fld"><label for="patientName">Name</label><input type="text" id="patientName" placeholder="optional"></div>
+                <div class="fld"><label for="patientId">MRN / ID</label><input type="text" id="patientId" placeholder="optional"></div>
+                <div class="fld"><label for="patientBed">Bed / location</label><input type="text" id="patientBed" placeholder="optional"></div>
+                <div class="fld"><label for="patientAge">Age</label><input type="number" id="patientAge" step="1" placeholder="years"></div>
+                <div class="fld"><label for="patientSex">Sex</label>
+                  <select id="patientSex"><option value="">—</option><option value="M">Male</option><option value="F">Female</option></select></div>
+                <div class="fld"><label for="patientWeight">Weight (kg)</label><input type="number" id="patientWeight" step="0.1" placeholder="sharpens dosing"></div>
+              </div>
+            </div>
+          </div>
 
-      <div class="card">
-        <button type="button" class="card-summary" data-collapse="patientCard" aria-expanded="false">
-          <span>Patient</span>
-          <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="card-body collapsible" id="patientCard">
-          <div class="row-grid">
-            <div class="fld"><label for="patientName">Name</label><input type="text" id="patientName" placeholder="optional"></div>
-            <div class="fld"><label for="patientId">MRN / ID</label><input type="text" id="patientId" placeholder="optional"></div>
-            <div class="fld"><label for="patientBed">Bed / location</label><input type="text" id="patientBed" placeholder="optional"></div>
-            <div class="fld"><label for="patientAge">Age</label><input type="number" id="patientAge" step="1" placeholder="years"></div>
-            <div class="fld"><label for="patientSex">Sex</label>
-              <select id="patientSex"><option value="">—</option><option value="M">Male</option><option value="F">Female</option></select></div>
-            <div class="fld"><label for="patientWeight">Weight (kg)</label><input type="number" id="patientWeight" step="0.1" placeholder="sharpens dosing"></div>
+          <form id="f">
+            <div class="card">
+              <div class="card-title">Blood gas</div>
+              <div class="card-body">
+                <div class="row-grid">
+                  <div class="fld"><label for="ph">pH</label><input type="number" id="ph" step="0.01" placeholder="7.35–7.45"></div>
+                  <div class="fld"><label for="pco2">pCO₂ (mmHg)</label><input type="number" id="pco2" step="0.1" placeholder="35–45"></div>
+                  <div class="fld"><label for="hco3">HCO₃⁻ (mEq/L)</label><input type="number" id="hco3" step="0.1" placeholder="22–26"></div>
+                  <div class="fld"><label for="na">Na⁺</label><input type="number" id="na" step="1" placeholder="135–145"></div>
+                  <div class="fld"><label for="k">K⁺</label><input type="number" id="k" step="0.1" placeholder="3.5–5.0"></div>
+                  <div class="fld"><label for="cl">Cl⁻</label><input type="number" id="cl" step="1" placeholder="98–106"></div>
+                  <div class="fld"><label for="lactate">Lactate (mmol/L)</label><input type="number" id="lactate" step="0.1" placeholder="< 2.0"></div>
+                  <div class="fld"><label for="albumin">Albumin (g/dL)</label><input type="number" id="albumin" step="0.1" placeholder="3.5–5.0"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <button type="button" class="card-summary" data-collapse="labsCard" aria-expanded="false">
+                <span>Additional labs <em>osmolal / urine gap</em></span>
+                <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="card-body collapsible" id="labsCard">
+                <div class="row-grid">
+                  <div class="fld"><label for="bun">BUN (mg/dL)</label><input type="number" id="bun" step="1"></div>
+                  <div class="fld"><label for="glucose">Glucose (mg/dL)</label><input type="number" id="glucose" step="1"></div>
+                  <div class="fld"><label for="measuredOsm">Meas. Osm</label><input type="number" id="measuredOsm" step="1"></div>
+                  <div class="fld"><label for="ethanol">Ethanol (mg/dL)</label><input type="number" id="ethanol" step="1"></div>
+                  <div class="fld"><label for="uNa">Urine Na⁺</label><input type="number" id="uNa" step="1"></div>
+                  <div class="fld"><label for="uK">Urine K⁺</label><input type="number" id="uK" step="1"></div>
+                  <div class="fld"><label for="uCl">Urine Cl⁻</label><input type="number" id="uCl" step="1"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <button type="button" class="card-summary" data-collapse="ventCard" aria-expanded="false">
+                <span>Ventilator / oxygenation</span>
+                <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="card-body collapsible" id="ventCard">
+                <div class="row-grid">
+                  <div class="fld"><label for="ventMode">Mode</label>
+                    <select id="ventMode"><option value="Not Set">Not set</option>
+                      <option>AC-VC</option><option>AC-PC</option><option>SIMV-VC</option>
+                      <option>SIMV-PC</option><option>PS/CPAP</option><option>Spontaneous</option></select></div>
+                  <div class="fld"><label for="fio2">FiO₂ (%)</label><input type="number" id="fio2" step="1" min="21" max="100" placeholder="21"></div>
+                  <div class="fld"><label for="pao2">PaO₂ (mmHg)</label><input type="number" id="pao2" step="1" placeholder="A–a gradient"></div>
+                  <div class="fld"><label for="weight">IBW (kg)</label><input type="number" id="weight" step="1" placeholder="for mL/kg"></div>
+                  <div class="fld"><label for="tidalVolume">Vt (mL)</label><input type="number" id="tidalVolume" step="10"></div>
+                  <div class="fld"><label for="respRate">RR (bpm)</label><input type="number" id="respRate" step="1"></div>
+                  <div class="fld"><label for="peep">PEEP (cmH₂O)</label><input type="number" id="peep" step="1"></div>
+                </div>
+
+                <div class="subhead">Lung mechanics <em>optional — sharpens the simulation below</em></div>
+                <div class="row-grid">
+                  <div class="fld"><label for="compliance">Compliance (mL/cmH₂O)</label><input type="number" id="compliance" step="1"></div>
+                  <div class="fld"><label for="vdvt">Dead-space fraction (Vd/Vt)</label><input type="number" id="vdvt" step="0.01" min="0" max="0.9" placeholder="0.30"></div>
+                  <div class="fld"><label for="resistance">Airway resistance</label><input type="number" id="resistance" step="0.5" placeholder="~8, assumed"></div>
+                  <div class="fld"><label for="ti">Insp. time, Ti (s)</label><input type="number" id="ti" step="0.05" placeholder="from I:E 1:2"></div>
+                </div>
+
+                <div class="subhead">What-if: simulate a parameter change</div>
+                <div class="row-grid">
+                  <div class="fld"><label for="simMode">Mode for this change</label>
+                    <select id="simMode"><option value="VC">Volume control (set Vt)</option><option value="PC">Pressure control (set ΔP)</option></select></div>
+                  <div class="fld"><label for="simRR">New RR (bpm)</label><input type="number" id="simRR" step="1" placeholder="current"></div>
+                  <div class="fld"><label for="simVt">New Vt (mL) — VC</label><input type="number" id="simVt" step="10" placeholder="current"></div>
+                  <div class="fld"><label for="simDP">New ΔP (cmH₂O) — PC</label><input type="number" id="simDP" step="1" placeholder="above PEEP"></div>
+                  <div class="fld"><label for="simFio2">New FiO₂ (%)</label><input type="number" id="simFio2" step="1" min="21" max="100" placeholder="current"></div>
+                  <div class="fld"><label for="simPeep">New PEEP (cmH₂O)</label><input type="number" id="simPeep" step="1" placeholder="current"></div>
+                  <div class="fld"><label for="simPplat">New Pplateau, measured</label><input type="number" id="simPplat" step="1" placeholder="optional"></div>
+                </div>
+                <div class="btn-row">
+                  <button type="button" id="ventSimBtn" class="btn btn-secondary">Simulate change</button>
+                </div>
+                <div id="ventSimOut" class="result-slot"><p class="placeholder">Leave a field blank to keep it at its current value. Uses RR/Vt/FiO₂/PEEP/PaO₂/compliance/resistance/Ti/Vd·Vt from above, IBW for the protective-ventilation check, and pH/pCO₂/HCO₃⁻/Na⁺/Cl⁻/albumin/lactate from the ABG form.</p></div>
+              </div>
+            </div>
+
+            <div class="action-row">
+              <button type="reset" class="btn btn-ghost">Reset</button>
+              <button type="button" id="logBtn" class="btn btn-secondary">Log to trend</button>
+              <button type="submit" class="btn btn-primary">Analyze</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="split-col split-col-right">
+          <div class="card result-card">
+            <div class="card-title">Interpretation</div>
+            <div class="card-body">
+              <div id="dx"></div>
+              <div id="out"><p class="placeholder">Enter values and analyze.</p></div>
+            </div>
+          </div>
+
+          <div class="card result-card">
+            <div class="card-title">Recommendations</div>
+            <div class="card-body">
+              <div id="rec"><p class="placeholder">Analyze to generate guidance.</p></div>
+            </div>
           </div>
         </div>
       </div>
-
-      <form id="f">
-        <div class="card">
-          <div class="card-title">Blood gas</div>
-          <div class="card-body">
-            <div class="row-grid">
-              <div class="fld"><label for="ph">pH</label><input type="number" id="ph" step="0.01" placeholder="7.35–7.45"></div>
-              <div class="fld"><label for="pco2">pCO₂ (mmHg)</label><input type="number" id="pco2" step="0.1" placeholder="35–45"></div>
-              <div class="fld"><label for="hco3">HCO₃⁻ (mEq/L)</label><input type="number" id="hco3" step="0.1" placeholder="22–26"></div>
-              <div class="fld"><label for="na">Na⁺</label><input type="number" id="na" step="1" placeholder="135–145"></div>
-              <div class="fld"><label for="k">K⁺</label><input type="number" id="k" step="0.1" placeholder="3.5–5.0"></div>
-              <div class="fld"><label for="cl">Cl⁻</label><input type="number" id="cl" step="1" placeholder="98–106"></div>
-              <div class="fld"><label for="lactate">Lactate (mmol/L)</label><input type="number" id="lactate" step="0.1" placeholder="< 2.0"></div>
-              <div class="fld"><label for="albumin">Albumin (g/dL)</label><input type="number" id="albumin" step="0.1" placeholder="3.5–5.0"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <button type="button" class="card-summary" data-collapse="labsCard" aria-expanded="false">
-            <span>Additional labs <em>osmolal / urine gap</em></span>
-            <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <div class="card-body collapsible" id="labsCard">
-            <div class="row-grid">
-              <div class="fld"><label for="bun">BUN (mg/dL)</label><input type="number" id="bun" step="1"></div>
-              <div class="fld"><label for="glucose">Glucose (mg/dL)</label><input type="number" id="glucose" step="1"></div>
-              <div class="fld"><label for="measuredOsm">Meas. Osm</label><input type="number" id="measuredOsm" step="1"></div>
-              <div class="fld"><label for="ethanol">Ethanol (mg/dL)</label><input type="number" id="ethanol" step="1"></div>
-              <div class="fld"><label for="uNa">Urine Na⁺</label><input type="number" id="uNa" step="1"></div>
-              <div class="fld"><label for="uK">Urine K⁺</label><input type="number" id="uK" step="1"></div>
-              <div class="fld"><label for="uCl">Urine Cl⁻</label><input type="number" id="uCl" step="1"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <button type="button" class="card-summary" data-collapse="ventCard" aria-expanded="false">
-            <span>Ventilator / oxygenation</span>
-            <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <div class="card-body collapsible" id="ventCard">
-            <div class="row-grid">
-              <div class="fld"><label for="ventMode">Mode</label>
-                <select id="ventMode"><option value="Not Set">Not set</option>
-                  <option>AC-VC</option><option>AC-PC</option><option>SIMV-VC</option>
-                  <option>SIMV-PC</option><option>PS/CPAP</option><option>Spontaneous</option></select></div>
-              <div class="fld"><label for="fio2">FiO₂ (%)</label><input type="number" id="fio2" step="1" min="21" max="100" placeholder="21"></div>
-              <div class="fld"><label for="pao2">PaO₂ (mmHg)</label><input type="number" id="pao2" step="1" placeholder="A–a gradient"></div>
-              <div class="fld"><label for="weight">IBW (kg)</label><input type="number" id="weight" step="1" placeholder="for mL/kg"></div>
-              <div class="fld"><label for="tidalVolume">Vt (mL)</label><input type="number" id="tidalVolume" step="10"></div>
-              <div class="fld"><label for="respRate">RR (bpm)</label><input type="number" id="respRate" step="1"></div>
-              <div class="fld"><label for="peep">PEEP (cmH₂O)</label><input type="number" id="peep" step="1"></div>
-            </div>
-
-            <div class="subhead">Lung mechanics <em>optional — sharpens the simulation below</em></div>
-            <div class="row-grid">
-              <div class="fld"><label for="compliance">Compliance (mL/cmH₂O)</label><input type="number" id="compliance" step="1"></div>
-              <div class="fld"><label for="vdvt">Dead-space fraction (Vd/Vt)</label><input type="number" id="vdvt" step="0.01" min="0" max="0.9" placeholder="0.30"></div>
-              <div class="fld"><label for="resistance">Airway resistance</label><input type="number" id="resistance" step="0.5" placeholder="~8, assumed"></div>
-              <div class="fld"><label for="ti">Insp. time, Ti (s)</label><input type="number" id="ti" step="0.05" placeholder="from I:E 1:2"></div>
-            </div>
-
-            <div class="subhead">What-if: simulate a parameter change</div>
-            <div class="row-grid">
-              <div class="fld"><label for="simMode">Mode for this change</label>
-                <select id="simMode"><option value="VC">Volume control (set Vt)</option><option value="PC">Pressure control (set ΔP)</option></select></div>
-              <div class="fld"><label for="simRR">New RR (bpm)</label><input type="number" id="simRR" step="1" placeholder="current"></div>
-              <div class="fld"><label for="simVt">New Vt (mL) — VC</label><input type="number" id="simVt" step="10" placeholder="current"></div>
-              <div class="fld"><label for="simDP">New ΔP (cmH₂O) — PC</label><input type="number" id="simDP" step="1" placeholder="above PEEP"></div>
-              <div class="fld"><label for="simFio2">New FiO₂ (%)</label><input type="number" id="simFio2" step="1" min="21" max="100" placeholder="current"></div>
-              <div class="fld"><label for="simPeep">New PEEP (cmH₂O)</label><input type="number" id="simPeep" step="1" placeholder="current"></div>
-              <div class="fld"><label for="simPplat">New Pplateau, measured</label><input type="number" id="simPplat" step="1" placeholder="optional"></div>
-            </div>
-            <div class="btn-row">
-              <button type="button" id="ventSimBtn" class="btn btn-secondary">Simulate change</button>
-            </div>
-            <div id="ventSimOut" class="result-slot"><p class="placeholder">Leave a field blank to keep it at its current value. Uses RR/Vt/FiO₂/PEEP/PaO₂/compliance/resistance/Ti/Vd·Vt from above, IBW for the protective-ventilation check, and pH/pCO₂/HCO₃⁻/Na⁺/Cl⁻/albumin/lactate from the ABG form.</p></div>
-          </div>
-        </div>
-
-        <div class="action-row">
-          <button type="reset" class="btn btn-ghost">Reset</button>
-          <button type="button" id="logBtn" class="btn btn-secondary">Log to trend</button>
-          <button type="submit" class="btn btn-primary">Analyze</button>
-        </div>
-      </form>
-
-      <div class="card result-card">
-        <div class="card-title">Interpretation</div>
-        <div class="card-body">
-          <div id="dx"></div>
-          <div id="out"><p class="placeholder">Enter values and analyze.</p></div>
-        </div>
-      </div>
-
-      <div class="card result-card">
-        <div class="card-title">Recommendations</div>
-        <div class="card-body">
-          <div id="rec"><p class="placeholder">Analyze to generate guidance.</p></div>
-        </div>
-      </div>
-
     </section>
 
     <!-- ============ TAB: DAVENPORT ============ -->
@@ -243,73 +247,78 @@
 
     <!-- ============ TAB: NEPHRO ============ -->
     <section class="tab-page" data-tab="nephro">
-
-      <div class="card">
-        <button type="button" class="card-summary" data-collapse="nRenalCard" aria-expanded="false">
-          <span>Renal function &amp; electrolyte corrections</span>
-          <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="card-body collapsible" id="nRenalCard">
-          <div class="subhead">Renal function</div>
-          <div class="row-grid">
-            <div class="fld"><label for="nAge">Age (yrs)</label><input type="number" id="nAge" step="1"></div>
-            <div class="fld"><label for="nSex">Sex</label>
-              <select id="nSex"><option value="">—</option><option value="M">Male</option><option value="F">Female</option></select></div>
-            <div class="fld"><label for="nCreatinine">Creatinine (mg/dL)</label><input type="number" id="nCreatinine" step="0.1"></div>
+      <div class="responsive-split">
+        <div class="split-col split-col-left">
+          <div class="card">
+            <button type="button" class="card-summary" data-collapse="nRenalCard" aria-expanded="false">
+              <span>Renal function &amp; electrolyte corrections</span>
+              <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="card-body collapsible" id="nRenalCard">
+              <div class="subhead">Renal function</div>
+              <div class="row-grid">
+                <div class="fld"><label for="nAge">Age (yrs)</label><input type="number" id="nAge" step="1"></div>
+                <div class="fld"><label for="nSex">Sex</label>
+                  <select id="nSex"><option value="">—</option><option value="M">Male</option><option value="F">Female</option></select></div>
+                <div class="fld"><label for="nCreatinine">Creatinine (mg/dL)</label><input type="number" id="nCreatinine" step="0.1"></div>
+              </div>
+              <div class="subhead">Electrolyte corrections</div>
+              <div class="row-grid">
+                <div class="fld"><label for="nCalcium">Total calcium (mg/dL)</label><input type="number" id="nCalcium" step="0.1"></div>
+                <div class="fld"><label for="nPhosphate">Phosphate (mg/dL)</label><input type="number" id="nPhosphate" step="0.1"></div>
+                <div class="fld"><label for="nMagnesium">Magnesium (mg/dL)</label><input type="number" id="nMagnesium" step="0.1"></div>
+              </div>
+            </div>
           </div>
-          <div class="subhead">Electrolyte corrections</div>
-          <div class="row-grid">
-            <div class="fld"><label for="nCalcium">Total calcium (mg/dL)</label><input type="number" id="nCalcium" step="0.1"></div>
-            <div class="fld"><label for="nPhosphate">Phosphate (mg/dL)</label><input type="number" id="nPhosphate" step="0.1"></div>
-            <div class="fld"><label for="nMagnesium">Magnesium (mg/dL)</label><input type="number" id="nMagnesium" step="0.1"></div>
+
+          <div class="card">
+            <button type="button" class="card-summary" data-collapse="nUrineCard" aria-expanded="false">
+              <span>Urine studies</span>
+              <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="card-body collapsible" id="nUrineCard">
+              <div class="row-grid">
+                <div class="fld"><label for="nUCr">Urine creatinine (mg/dL)</label><input type="number" id="nUCr" step="1"></div>
+                <div class="fld"><label for="nUUrea">Urine urea (mg/dL)</label><input type="number" id="nUUrea" step="1"></div>
+                <div class="fld"><label for="nUPhos">Urine phosphate (mg/dL)</label><input type="number" id="nUPhos" step="0.1"></div>
+                <div class="fld"><label for="nUOsm">Urine osmolality</label><input type="number" id="nUOsm" step="1"></div>
+                <div class="fld"><label for="nUVol">Urine volume (mL)</label><input type="number" id="nUVol" step="1"></div>
+                <div class="fld"><label for="nUTime">Collection time (hr)</label><input type="number" id="nUTime" step="0.5"></div>
+              </div>
+              <p class="card-hint">Urine Na⁺ / K⁺ are read from Additional labs on the Analyze tab.</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <button type="button" class="card-summary" data-collapse="nDialysisCard" aria-expanded="false">
+              <span>Dialysis adequacy</span>
+              <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="card-body collapsible" id="nDialysisCard">
+              <div class="row-grid">
+                <div class="fld"><label for="nPreBUN">Pre-HD BUN (mg/dL)</label><input type="number" id="nPreBUN" step="1"></div>
+                <div class="fld"><label for="nPostBUN">Post-HD BUN (mg/dL)</label><input type="number" id="nPostBUN" step="1"></div>
+                <div class="fld"><label for="nHdTime">Session length (hr)</label><input type="number" id="nHdTime" step="0.1"></div>
+                <div class="fld"><label for="nUfVolume">Ultrafiltration (L)</label><input type="number" id="nUfVolume" step="0.1"></div>
+                <div class="fld"><label for="nPostWeight">Post-HD weight (kg)</label><input type="number" id="nPostWeight" step="0.1"></div>
+                <div class="fld"><label for="nSessions">Sessions / week</label><input type="number" id="nSessions" step="1" value="3"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button type="button" id="nephroBtn" class="btn btn-primary">Calculate nephrology panel</button>
+          </div>
+        </div>
+
+        <div class="split-col split-col-right">
+          <div class="card result-card">
+            <div class="card-body">
+              <div id="nephroOut"><p class="placeholder">Enter nephrology labs above and calculate. Uses Na⁺/K⁺/Cl⁻/albumin/lactate/pH/HCO₃⁻/glucose/BUN already entered on the Analyze tab, plus the fields here.</p></div>
+            </div>
           </div>
         </div>
       </div>
-
-      <div class="card">
-        <button type="button" class="card-summary" data-collapse="nUrineCard" aria-expanded="false">
-          <span>Urine studies</span>
-          <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="card-body collapsible" id="nUrineCard">
-          <div class="row-grid">
-            <div class="fld"><label for="nUCr">Urine creatinine (mg/dL)</label><input type="number" id="nUCr" step="1"></div>
-            <div class="fld"><label for="nUUrea">Urine urea (mg/dL)</label><input type="number" id="nUUrea" step="1"></div>
-            <div class="fld"><label for="nUPhos">Urine phosphate (mg/dL)</label><input type="number" id="nUPhos" step="0.1"></div>
-            <div class="fld"><label for="nUOsm">Urine osmolality</label><input type="number" id="nUOsm" step="1"></div>
-            <div class="fld"><label for="nUVol">Urine volume (mL)</label><input type="number" id="nUVol" step="1"></div>
-            <div class="fld"><label for="nUTime">Collection time (hr)</label><input type="number" id="nUTime" step="0.5"></div>
-          </div>
-          <p class="card-hint">Urine Na⁺ / K⁺ are read from Additional labs on the Analyze tab.</p>
-        </div>
-      </div>
-
-      <div class="card">
-        <button type="button" class="card-summary" data-collapse="nDialysisCard" aria-expanded="false">
-          <span>Dialysis adequacy</span>
-          <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="card-body collapsible" id="nDialysisCard">
-          <div class="row-grid">
-            <div class="fld"><label for="nPreBUN">Pre-HD BUN (mg/dL)</label><input type="number" id="nPreBUN" step="1"></div>
-            <div class="fld"><label for="nPostBUN">Post-HD BUN (mg/dL)</label><input type="number" id="nPostBUN" step="1"></div>
-            <div class="fld"><label for="nHdTime">Session length (hr)</label><input type="number" id="nHdTime" step="0.1"></div>
-            <div class="fld"><label for="nUfVolume">Ultrafiltration (L)</label><input type="number" id="nUfVolume" step="0.1"></div>
-            <div class="fld"><label for="nPostWeight">Post-HD weight (kg)</label><input type="number" id="nPostWeight" step="0.1"></div>
-            <div class="fld"><label for="nSessions">Sessions / week</label><input type="number" id="nSessions" step="1" value="3"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="action-row">
-        <button type="button" id="nephroBtn" class="btn btn-primary">Calculate nephrology panel</button>
-      </div>
-      <div class="card result-card">
-        <div class="card-body">
-          <div id="nephroOut"><p class="placeholder">Enter nephrology labs above and calculate. Uses Na⁺/K⁺/Cl⁻/albumin/lactate/pH/HCO₃⁻/glucose/BUN already entered on the Analyze tab, plus the fields here.</p></div>
-        </div>
-      </div>
-
     </section>
 
     <!-- ============ TAB: REFERENCE ============ -->

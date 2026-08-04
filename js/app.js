@@ -26,6 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let lastAnalysis = null;
 
+  function renderTrend(){
+    ABG.Trend.render($('trend'), renderTrend);
+    ABG.Davenport.draw(null, ABG.Trend.log);
+  }
+
   function run(logIt){
     collectPatient();
     const d = collect();
@@ -65,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(logIt){
       ABG.Trend.add({ph:d.ph,pco2:d.pco2,hco3:d.hco3,lactate:d.lactate,ag:r.cAG,dx:r.integrated,t:new Date()});
     }
-    ABG.Trend.render($('trend'), () => ABG.Davenport.draw(null, ABG.Trend.log));
+    ABG.Trend.render($('trend'), renderTrend);
     ABG.Davenport.draw({ph:d.ph,hco3:d.hco3,pco2:d.pco2,integrated:r.integrated}, ABG.Trend.log);
   }
 
@@ -102,13 +107,12 @@ document.addEventListener('DOMContentLoaded', () => {
     $('rec').innerHTML=`<p class="placeholder">Analyze to generate guidance.</p>`;
     lastAnalysis = null;
     ABG.Trend.clear();
-    ABG.Trend.render($('trend'), () => ABG.Davenport.draw(null, ABG.Trend.log));
-    ABG.Davenport.draw(null, []);
+    renderTrend();
   });
 
   $('nephroBtn').addEventListener('click', runNephro);
   $('ventSimBtn').addEventListener('click', runVentSim);
   $('printBtn').addEventListener('click', () => ABG.Export.printReport());
 
-  ABG.Trend.render($('trend'), () => ABG.Davenport.draw(null, ABG.Trend.log));
+  renderTrend();
 });
