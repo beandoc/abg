@@ -39,6 +39,15 @@ ABG.Tutor = (function(){
         ph: 7.37, pco2: 56, hco3: 31, na: 139, k: 3.2, cl: 96, lactate: 1.1, albumin: 4.2,
         bun: 22, glucose: 110
       }
+    },
+    case5: {
+      title: 'Case 5: Warburg Effect Type B Lactic Acidosis (45F Metastatic Ductal Carcinoma)',
+      description: 'Metastatic breast cancer (liver, bone, peritoneum) causing aerobic glycolysis (Warburg effect) with severe Type B Lactic Acidosis (Lactate 10.0), HAGMA (AG 24, corrected 26.8), and post-Zoledronic Acid Hypophosphatemia.',
+      labs: {
+        patientName: 'Case 5 (45F)', patientAge: 45, patientSex: 'F', patientWeight: 60,
+        ph: 7.30, pco2: 27, hco3: 12, na: 135, k: 3.6, cl: 99, lactate: 10.0, albumin: 2.9,
+        bun: 16, glucose: 110, nPhosphate: 1.1
+      }
     }
   };
 
@@ -229,6 +238,7 @@ ABG.Tutor = (function(){
         <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case2')">Case 2: Aspirin Toxicity + Vent Trap</button>
         <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case3')">Case 3: Linezolid Type B Acidosis</button>
         <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case4')">Case 4: COPD Exacerbation</button>
+        <button type="button" class="preset-btn" onclick="ABG.Tutor.loadPreset('case5')">Case 5: Warburg Effect (45F Cancer)</button>
       </div>
     `;
 
