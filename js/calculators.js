@@ -51,6 +51,15 @@ ABG.Calculators = (function(){
     return { PAO2, aa: PAO2 - pao2 };
   }
 
+  // Devine Formula for Ideal Body Weight (ARDSNet Standard)
+  function calcIBW(heightCm, sex){
+    if(!heightCm || heightCm < 100) return null;
+    const isMale = !sex || sex.toUpperCase() === 'M' || sex.toUpperCase() === 'MALE';
+    const base = isMale ? 50 : 45.5;
+    const ibw = base + 0.91 * (heightCm - 152.4);
+    return Math.max(30, Math.round(ibw * 10) / 10);
+  }
+
   function ibwPerKg(vt, weight){ return vt / weight; }
 
   function minuteVentilation(vt, rr){ return vt * rr; }
@@ -107,7 +116,7 @@ ABG.Calculators = (function(){
     metAcidExpectedPCO2, metAlkExpectedPCO2,
     respAcidAcuteHCO3, respAcidChronicHCO3, respAlkAcuteHCO3, respAlkChronicHCO3,
     anionGap, correctedAnionGap, deltaRatio,
-    calcOsm, osmolalGap, urineAnionGap, aaGradient, ibwPerKg,
+    calcOsm, osmolalGap, urineAnionGap, aaGradient, calcIBW, ibwPerKg,
     minuteVentilation, predictedPCO2FromVE, alveolarVentilation, acuteHCO3Shift,
     clDeficit, salineVolumeL, hPlusDeficit, hclVolumeL,
     plateauPressure, drivingPressure, staticCompliance, pfRatio, mechanicalPower,

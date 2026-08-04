@@ -299,6 +299,13 @@ footer{text-align:center; margin:6px 0 10px; font-size:.76rem; color:var(--muted
 .node-desc{font-size:.83rem; color:#3A3A3C; line-height:1.5;}
 
 .btn-sm { padding: 6px 12px; font-size: 0.78rem; border-radius: 8px; }
+.ibw-badge-btn {
+  font-size: 0.65rem; font-weight: 700; color: var(--accent-dk);
+  background: var(--accent-bg); border: 1px solid rgba(5,150,105,0.3);
+  padding: 1px 6px; border-radius: 6px; cursor: pointer;
+  margin-left: 6px; vertical-align: middle; transition: background 0.15s;
+}
+.ibw-badge-btn:hover { background: #D1FAE5; }
 
 /* ---- Patient Vault Modal ---- */
 .vault-backdrop {

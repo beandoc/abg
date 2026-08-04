@@ -112,6 +112,7 @@
                 <div class="fld"><label for="patientAge">Age</label><input type="number" id="patientAge" step="1" placeholder="years"></div>
                 <div class="fld"><label for="patientSex">Sex</label>
                   <select id="patientSex"><option value="">—</option><option value="M">Male</option><option value="F">Female</option></select></div>
+                <div class="fld"><label for="patientHeight">Height (cm)</label><input type="number" id="patientHeight" step="1" placeholder="e.g. 175"></div>
                 <div class="fld"><label for="patientWeight">Weight (kg)</label><input type="number" id="patientWeight" step="0.1" placeholder="dosing weight"></div>
               </div>
               <div class="btn-row" style="margin-top:12px;">
@@ -169,7 +170,7 @@
                     <select id="ventMode"><option value="Not Set">Not set</option>
                       <option>AC-VC</option><option>AC-PC</option><option>SIMV-VC</option>
                       <option>SIMV-PC</option><option>PS/CPAP</option><option>Spontaneous</option></select></div>
-                  <div class="fld"><label for="weight">IBW (kg)</label><input type="number" id="weight" step="1" placeholder="Ideal Body Weight"></div>
+                  <div class="fld"><label for="weight">IBW (kg) <button type="button" id="calcIbwBtn" class="ibw-badge-btn" title="Calculate IBW using Devine Formula">Auto-Calc</button></label><input type="number" id="weight" step="1" placeholder="Ideal Body Weight"></div>
                   <div class="fld"><label for="tidalVolume">Tidal Volume, Vt (mL)</label><input type="number" id="tidalVolume" step="10" placeholder="e.g. 420"></div>
                   <div class="fld"><label for="respRate">Resp. Rate, RR (bpm)</label><input type="number" id="respRate" step="1" placeholder="e.g. 18"></div>
                 </div>

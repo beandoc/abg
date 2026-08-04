@@ -20,8 +20,27 @@ document.addEventListener('DOMContentLoaded', () => {
   function collectPatient(){
     ABG.Patient.set({
       name: $('patientName').value.trim(), id: $('patientId').value.trim(), bed: $('patientBed').value.trim(),
-      age: num('patientAge'), sex: $('patientSex').value, weight: num('patientWeight')
+      age: num('patientAge'), sex: $('patientSex').value, height: num('patientHeight'), weight: num('patientWeight')
     });
+  }
+
+  function autoComputeIBW(){
+    const height = num('patientHeight');
+    const sex = $('patientSex').value;
+    const actualWt = num('patientWeight');
+
+    let ibw = ABG.Calculators.calcIBW(height, sex);
+    if(!ibw && actualWt){
+      ibw = actualWt;
+    }
+    if(!ibw){
+      const isMale = !sex || sex === 'M';
+      ibw = isMale ? 70 : 55;
+    }
+
+    const rounded = Math.round(ibw);
+    $('weight').value = rounded;
+    return rounded;
   }
 
   let lastAnalysis = null;
@@ -112,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('patientBed').value = p.bed || '';
     $('patientAge').value = p.age != null ? p.age : '';
     $('patientSex').value = p.sex || '';
+    $('patientHeight').value = p.height != null ? p.height : '';
     $('patientWeight').value = p.weight != null ? p.weight : '';
     ABG.Patient.set(p);
 
@@ -193,6 +213,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if(saveBtn) saveBtn.addEventListener('click', () => {
     autoSaveSession();
     alert('Patient case record saved successfully.');
+  });
+
+  const calcIbwBtn = $('calcIbwBtn');
+  if(calcIbwBtn) calcIbwBtn.addEventListener('click', () => {
+    const ibwVal = autoComputeIBW();
+    alert(`Calculated IBW: ${ibwVal} kg (Devine Formula / Target)`);
   });
 
   const openVaultBtn = $('openVaultBtn');
