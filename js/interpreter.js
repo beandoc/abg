@@ -118,17 +118,21 @@ ABG.Interpreter = (function(){
     let ag=null,cAG=null,agState='n/a';
     if(na!==null&&cl!==null){
       ag=C.anionGap(na,cl,hco3);
+      let agNote = '';
+      if(glucose !== null && glucose > 200){
+        agNote = `<div class="why"><b>Hyperglycemia Rule (Glucose ${glucose} mg/dL):</b> Measured Na⁺ (${na}) is used to calculate the AG. Do <b>NOT</b> use glucose-corrected Na⁺ for AG calculation, as osmotic fluid shift dilutes Na⁺, Cl⁻, and HCO₃⁻ equally — using corrected Na⁺ overestimates the AG and falsely implies high-AG acidosis.</div>`;
+      }
       if(albumin!==null){
         cAG=C.correctedAnionGap(ag,albumin,N_ALB);
         agState = cAG>16?'high':(cAG>12?'borderline':(cAG<6?'low':'normal'));
         S('Step 4 · Anion gap',
           `AG = ${na} − (${cl} + ${f1(hco3)}) = <span class="val">${f1(ag)}</span>. Albumin ${f1(albumin)} → corrected AG <span class="val">${f1(cAG)}</span> (${agState}).`
-          + `<div class="why">Correcting for albumin matters: each 1 g/dL fall in albumin lowers the measured gap by ~2.5, so a "normal" AG can hide an organic acidosis in a hypoalbuminaemic patient.</div>`);
+          + `<div class="why">Correcting for albumin matters: each 1 g/dL fall in albumin lowers the measured gap by ~2.5, so a "normal" AG can hide an organic acidosis in a hypoalbuminaemic patient.</div>` + agNote);
       } else {
         cAG=ag; agState = cAG>16?'high':(cAG>12?'borderline':(cAG<6?'low':'normal'));
         S('Step 4 · Anion gap',
           `AG = ${na} − (${cl} + ${f1(hco3)}) = <span class="val">${f1(ag)}</span> (${agState}). Albumin not entered — correction not applied.`
-          + (agState==='low'?`<div class="why">A low AG is itself abnormal — consider hypoalbuminaemia (commonest), or unmeasured cations (e.g. IgG paraproteinaemia, lithium, severe hypercalcaemia).</div>`:''));
+          + (agState==='low'?`<div class="why">A low AG is itself abnormal — consider hypoalbuminaemia (commonest), or unmeasured cations (e.g. IgG paraproteinaemia, lithium, severe hypercalcaemia).</div>`:'') + agNote);
       }
     } else {
       S('Step 4 · Anion gap', `Not calculated (Na⁺ or Cl⁻ missing). The AG is the single most important step for uncovering hidden acidosis — enter electrolytes.`);
