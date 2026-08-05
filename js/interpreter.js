@@ -200,8 +200,8 @@ ABG.Interpreter = (function(){
       const expected=isChronic?chronic:acute;
       disorders.push(isChronic?'Chronic respiratory alkalosis':'Acute respiratory alkalosis');
       compLine=`Renal compensation: acute expects HCO₃⁻ ≈ <span class="val">${f1(acute)}</span> (−0.2/mmHg), chronic ≈ <span class="val">${f1(chronic)}</span> (−0.4/mmHg). Measured ${f1(hco3)} → best fits <b>${isChronic?'chronic':'acute'}</b>.`;
-      if(highAG && hco3 < expected-3){disorders.push('concurrent high-AG metabolic acidosis'); compLine+=` HCO₃⁻ ${f1(hco3)} is well below the expected ${f1(expected)} and the AG is high (${f1(cAG)}) → superimposed <b>high-AG metabolic acidosis</b> (classic salicylate/lactate picture).`;}
-      else if(highAG) compLine+=` <span class="why" style="display:inline">Note: AG is high (${f1(cAG)}) but HCO₃⁻ sits near the expected compensation, so the gap is not dragging bicarbonate down — investigate the gap clinically, but it is not a definite second disorder here.</span>`;
+      if(highAG && hco3 < expected-3){compLine+=` HCO₃⁻ ${f1(hco3)} is well below the expected ${f1(expected)} and the AG is high (${f1(cAG)}) → superimposed <b>high-AG metabolic acidosis</b> (classic salicylate/lactate picture); see the Delta Gap ratio below.`;}
+      else if(highAG) compLine+=` <span class="why" style="display:inline">Note: AG is high (${f1(cAG)}); HCO₃⁻ being close to the expected compensation does not clear the gap — a high AG needs its own workup regardless of how well the HCO₃⁻ fits compensation. See the Delta Gap ratio below for quantification.</span>`;
     }
     else {
       if(highAG){
