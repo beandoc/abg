@@ -60,6 +60,80 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function renderExecutiveSummary(r, d){
+    const phStatus = d.ph < 7.35 ? 'Acidemia' : d.ph > 7.45 ? 'Alkalemia' : 'Normal pH';
+    const agVal = r.cAG != null ? r.cAG.toFixed(1) : (r.ag != null ? r.ag.toFixed(1) : null);
+
+    let deltaRatioStr = null;
+    if(r.cAG != null && r.cAG > 12 && d.hco3 != null && d.hco3 < 24){
+      const dAG = r.cAG - 12;
+      const dHCO3 = 24 - d.hco3;
+      if(dHCO3 > 0) deltaRatioStr = (dAG / dHCO3).toFixed(2);
+    }
+
+    let deltaSub = 'NAGMA';
+    if(deltaRatioStr !== null){
+      const val = parseFloat(deltaRatioStr);
+      if(val < 1.0) deltaSub = 'NAGMA (<1.0)';
+      else if(val <= 2.0) deltaSub = 'Pure HAGMA (1.0–2.0)';
+      else deltaSub = 'Met Alk (>2.0)';
+    }
+
+    return `
+      <div class="executive-summary-card">
+        <div class="exec-summary-head">⚡ Core Clinical Metrics &amp; Key Findings</div>
+        <div class="exec-metrics-grid">
+          <div class="exec-metric">
+            <span class="lbl">pH</span>
+            <span class="val ${d.ph < 7.35 ? 'acid' : d.ph > 7.45 ? 'alk' : ''}">${d.ph.toFixed(2)}</span>
+            <span class="sub">${phStatus}</span>
+          </div>
+          <div class="exec-metric">
+            <span class="lbl">pCO₂</span>
+            <span class="val">${d.pco2} <small>mmHg</small></span>
+            <span class="sub">${d.pco2 < 35 ? 'Low' : d.pco2 > 45 ? 'High' : 'Normal'}</span>
+          </div>
+          <div class="exec-metric">
+            <span class="lbl">HCO₃⁻</span>
+            <span class="val">${d.hco3} <small>mEq/L</small></span>
+            <span class="sub">${d.hco3 < 22 ? 'Low' : d.hco3 > 26 ? 'High' : 'Normal'}</span>
+          </div>
+          ${agVal !== null ? `
+          <div class="exec-metric">
+            <span class="lbl">Corr. AG</span>
+            <span class="val ${parseFloat(agVal) > 12 ? 'acid' : ''}">${agVal} <small>mEq/L</small></span>
+            <span class="sub">${parseFloat(agVal) > 12 ? 'High AG' : 'Normal AG'}</span>
+          </div>
+          ` : ''}
+          ${deltaRatioStr !== null ? `
+          <div class="exec-metric">
+            <span class="lbl">ΔAG / ΔHCO₃⁻</span>
+            <span class="val">${deltaRatioStr}</span>
+            <span class="sub">${deltaSub}</span>
+          </div>
+          ` : ''}
+          ${d.lactate != null ? `
+          <div class="exec-metric">
+            <span class="lbl">Lactate</span>
+            <span class="val ${d.lactate > 2.0 ? 'acid' : ''}">${d.lactate} <small>mmol/L</small></span>
+            <span class="sub">${d.lactate > 2.0 ? 'Elevated' : 'Normal'}</span>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+
+      <details class="steps-transcript-accordion">
+        <summary class="steps-transcript-summary">
+          <span>📄 View Full Step-by-Step Rationale Transcript (${r.steps.length} Steps)</span>
+          <span class="expand-badge">Expand Rationale</span>
+        </summary>
+        <div class="steps-transcript-body">
+          ${r.steps.map(s=>`<div class="step"><div class="h">${s.h}</div><div class="b">${s.b}</div></div>`).join('')}
+        </div>
+      </details>
+    `;
+  }
+
   function run(logIt){
     collectPatient();
     const d = collect();
@@ -81,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     $('dx').innerHTML = `<div class="dx ${r.dxClass}">${r.integrated}<small>Primary: ${r.primary}</small></div>`;
-    $('out').innerHTML = r.steps.map(s=>`<div class="step"><div class="h">${s.h}</div><div class="b">${s.b}</div></div>`).join('');
+    $('out').innerHTML = renderExecutiveSummary(r, d);
 
     if(ABG.Tutor && ABG.Tutor.updateTutorView) ABG.Tutor.updateTutorView(r, d);
 

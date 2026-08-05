@@ -320,7 +320,6 @@ ABG.Interpreter = (function(){
     const respAlk = d.includes('respiratory alkalosis');
     const metAcid = d.includes('metabolic acidosis')||d.includes('anion-gap');
     const metAlk = d.includes('metabolic alkalosis');
-    const compensating = metAcid && respAlk;
 
     if(respAcid){
       R.push(['a','<b>Respiratory acidosis</b> — CO₂ retention from inadequate alveolar ventilation. Pathophysiology: minute ventilation is failing to clear CO₂ (airway obstruction, respiratory fatigue, sedation, or neuromuscular weakness).']);
@@ -328,14 +327,12 @@ ABG.Interpreter = (function(){
         ? `On the ventilator, minute ventilation = Vt × RR. To lower pCO₂, raise RR first, then Vt (target ~6 mL/kg IBW${vent.tidalVolume!==null&&vent.weight?`; current ≈ ${f1(C.ibwPerKg(vent.tidalVolume,vent.weight))} mL/kg`:''}). Watch plateau pressure and auto-PEEP; permissive hypercapnia is acceptable in ARDS/severe asthma if pH is tolerated.`
         : 'Support ventilation: treat the reversible cause, consider NIV; escalate to intubation for fatigue, falling GCS, or refractory acidaemia.']);
     }
-    if(respAlk && !compensating){
+    if(respAlk){
       R.push(['k','<b>Respiratory alkalosis</b> — CO₂ blown off by excess ventilation. Pathophysiology: a stimulus (hypoxaemia, pain, anxiety, sepsis, PE, CNS drive) is driving hyperventilation.']);
       R.push(['', vented
         ? 'Reduce set RR or Vt and confirm the patient is not over-triggering; ensure adequate sedation/analgesia.'
         : 'Find and treat the driver — check oxygenation, exclude PE and sepsis, address pain/anxiety.']);
-    }
-    if(compensating){
-      R.push(['','<b>Note:</b> the low pCO₂ here is <i>appropriate compensation</i> for the metabolic acidosis, not a primary respiratory alkalosis. Do not suppress the respiratory drive — treating the acidosis is what corrects the pCO₂. If this patient were intubated, matching their spontaneous minute ventilation is essential; dropping it precipitates dangerous acidaemia.']);
+      if(metAcid) R.push(['','<b>Note:</b> a concurrent metabolic acidosis is also present, so some of this hyperventilation may be appropriate compensation rather than purely the primary driver — do not suppress the respiratory drive or normalise pCO₂ by matching ventilation down, as that precipitates dangerous acidaemia. Still look for and treat an independent driver (e.g. sepsis, salicylates) — compensation and a second primary process are not mutually exclusive.']);
     }
     if(metAcid){
       R.push(['a','<b>Metabolic acidosis</b> — identify and treat the source.']);

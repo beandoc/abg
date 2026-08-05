@@ -203,7 +203,7 @@ ABG.Tutor = (function(){
   function renderTutorStepper(r, d){
     const steps = r.steps || [];
     return `
-      <div class="tutor-stepper-wrap">
+      <div class="tutor-stepper-wrap" id="tutorStepperContainer">
         <div class="tutor-header">
           <div class="tutor-title">💡 Interactive Thinking Assistant & Step-by-Step Guide</div>
           <div class="tutor-sub">Walk through the clinical reasoning step-by-step:</div>
@@ -227,9 +227,23 @@ ABG.Tutor = (function(){
 
   function setStep(idx){
     activeStepIndex = idx;
-    if(currentAnalysis){
-      const el = document.getElementById('tutorStepperContainer');
-      if(el) el.innerHTML = renderTutorStepper(currentAnalysis.r, currentAnalysis.d);
+    if(!currentAnalysis || !currentAnalysis.r || !currentAnalysis.r.steps) return;
+    const wrap = document.getElementById('tutorStepperContainer');
+    if(!wrap) return;
+
+    const btns = wrap.querySelectorAll('.tutor-step-btn');
+    btns.forEach((btn, i) => {
+      if(i === idx) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+
+    const card = wrap.querySelector('.tutor-card');
+    const step = currentAnalysis.r.steps[idx];
+    if(card && step){
+      card.innerHTML = `
+        <div class="tutor-step-title">${step.h}</div>
+        <div class="tutor-step-body">${step.b}</div>
+      `;
     }
   }
 
