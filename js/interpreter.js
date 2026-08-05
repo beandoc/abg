@@ -31,11 +31,13 @@ ABG.Interpreter = (function(){
     const Hmeas = C.hFromPh(ph);
     const phFromHcalc = C.phFromH(Hcalc);
     const pctDiff = C.pctDiff(Hcalc, Hmeas);
-    S('Step 1 · Internal consistency',
-      `Henderson [H⁺] = 24 × ${f1(pco2)}/${f1(hco3)} = <span class="val">${f1(Hcalc)}</span> nmol/L → pH <span class="val">${phFromHcalc.toFixed(2)}</span>; entered pH implies [H⁺] ${f1(Hmeas)}. `
+    S('Step 1 · Internal consistency (Henderson Equation)',
+      `Henderson [H⁺] = 24 × ${f1(pco2)}/${f1(hco3)} = <span class="val">${f1(Hcalc)}</span> nmol/L → predicts pH <span class="val">${phFromHcalc.toFixed(2)}</span>; entered pH implies [H⁺] <span class="val">${f1(Hmeas)}</span> nmol/L. `
       + (pctDiff<=20
           ? `Within ${pctDiff.toFixed(0)}% — values are internally consistent.`
-          : `<span class="fa">Differ by ${pctDiff.toFixed(0)}% — inconsistent.</span>`));
+          : `<span class="fa">Differ by ${pctDiff.toFixed(0)}% — inconsistent.</span>`)
+      + `<div class="why"><b>Clinical [H⁺] Reference Scale:</b> pH 7.50 = 30 · 7.40 = 40 · 7.30 = 50 · 7.20 = 60 · 7.10 = 80 · 7.00 = 100 nmol/L.<br>`
+      + `<i>Lab Note:</i> ABG HCO₃⁻ is calculated via the Henderson equation and is normally 1–2 mEq/L <i>lower</i> than measured serum chemistry TCO₂ (which includes dissolved CO₂ &amp; H₂CO₃). A mismatch &gt; 2–3 mEq/L warrants repeating labs simultaneously.</div>`);
     if(pctDiff>20){
       return {invalid:true, msg:`The pH, pCO₂ and HCO₃⁻ are internally inconsistent — the Henderson equation predicts [H⁺] ${f1(Hcalc)} (pH ${phFromHcalc.toFixed(2)}) but the entered pH implies [H⁺] ${f1(Hmeas)}, a ${pctDiff.toFixed(0)}% mismatch. Per the textbook method, repeat the electrolytes and ABG a few minutes apart before interpreting — this points to a pre-analytical or transcription error, not a real disorder.`};
     }
