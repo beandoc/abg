@@ -45,6 +45,20 @@ ABG.Calculators = (function(){
 
   function urineAnionGap(uNa, uK, uCl){ return (uNa + uK) - uCl; }
 
+  // Urine Osmolal Gap (UOG): Used to estimate urinary NH4+ excretion (approx UOG / 2) when unmeasured urine anions (e.g. ketoanions, hippurate) distort the Urine Anion Gap.
+  function urineOsmolalGap(uOsmMeasured, uNa, uK, uBUN, uGlucose){
+    if(uOsmMeasured == null || uNa == null || uK == null) return null;
+    const calc = 2 * (uNa + uK) + (uBUN != null ? uBUN / 2.8 : 0) + (uGlucose != null ? uGlucose / 18 : 0);
+    const gap = uOsmMeasured - calc;
+    const estNH4 = Math.max(0, gap / 2);
+    return {
+      calcOsm: Math.round(calc * 10) / 10,
+      gap: Math.round(gap * 10) / 10,
+      estNH4: Math.round(estNH4 * 10) / 10,
+      isLow: gap < 100
+    };
+  }
+
   // Alveolar gas equation at sea level (Patm 760, PH2O 47, R 0.8).
   function alveolarPO2(pco2, fio2Pct){
     return (fio2Pct / 100) * (760 - 47) - pco2 / 0.8;
@@ -165,7 +179,7 @@ ABG.Calculators = (function(){
     metAcidExpectedPCO2, metAlkExpectedPCO2,
     respAcidAcuteHCO3, respAcidChronicHCO3, respAlkAcuteHCO3, respAlkChronicHCO3,
     anionGap, correctedAnionGap, deltaRatio,
-    calcOsm, osmolalGap, urineAnionGap, alveolarPO2, aaGradient, calcIBW, ibwPerKg, vbgToAbg, pvPaCO2Gap, naClRatio,
+    calcOsm, osmolalGap, urineAnionGap, urineOsmolalGap, alveolarPO2, aaGradient, calcIBW, ibwPerKg, vbgToAbg, pvPaCO2Gap, naClRatio,
     minuteVentilation, predictedPCO2FromVE, alveolarVentilation, acuteHCO3Shift,
     clDeficit, salineVolumeL, hPlusDeficit, hclVolumeL,
     plateauPressure, drivingPressure, staticCompliance, pfRatio, aAratio, peakPressure, mechanicalPower,
