@@ -115,6 +115,12 @@ ABG.Interpreter = (function(){
     S('Step 3 · Primary disorder',
       `pH ${ph.toFixed(2)} (pivot 7.40), HCO₃⁻ ${f1(hco3)}, pCO₂ ${f1(pco2)} → <b>${primary}</b>.`);
 
+    if(ph < 7.10){
+      S('Critical Hemodynamic Warning (pH < 7.10)',
+        `<span class="fa">Severe Acidemia (pH ${ph.toFixed(2)} &lt; 7.10): High risk of myocardial depression, refractory peripheral vasodilation (vasoplegic shock), and blunted responsiveness to vasopressors.</span>` +
+        `<div class="why">At pH &lt; 7.10, beta-adrenergic receptor binding drops and intracellular calcium handling is impaired, precipitating cardiovascular collapse. Target pH ≥ 7.20 with etiology control, alkalinization, or RRT.</div>`);
+    }
+
     let ag=null,cAG=null,agState='n/a';
     if(na!==null&&cl!==null){
       ag=C.anionGap(na,cl,hco3);
