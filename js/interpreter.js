@@ -189,7 +189,9 @@ ABG.Interpreter = (function(){
         compLine+=` <span class="why" style="display:inline">Caveat: with this degree of chronic hypercapnia (e.g. known COPD), HCO₃⁻ ${f1(hco3)} is well below the chronic expectation of ${f1(chronic)} — if the process is in fact chronic, a superimposed <b>metabolic acidosis</b> (e.g. diarrhoea, renal) is likely. History decides.</span>`;
       }
       const expectedRA=isChronic?chronic:acute;
-      if(highAG && hco3<expectedRA-3 && !disorders.includes('superimposed metabolic acidosis')){disorders.push('concurrent high-AG metabolic acidosis'); compLine+=` AG is high (${f1(cAG)}) with HCO₃⁻ below expected → coexisting <b>high-AG metabolic acidosis</b>.`;}
+      if(isChronic){
+        compLine+=`<div class="why" style="margin-top:6px;"><b>Ventilator &amp; Management Safety Pearl:</b> In Chronic Respiratory Acidosis (e.g. COPD/OHS), do NOT rapidly blow off pCO₂ to 40 mmHg during mechanical ventilation! Normalizing pCO₂ while serum HCO₃⁻ is chronically elevated (${f1(hco3)}) precipitates severe <b>Post-Hypercapnic Metabolic Alkalosis</b> (pH &gt; 7.55 with risk of seizures, arrhythmias, and vasospasm). Target the patient's baseline pH (7.35–7.38) and pCO₂. Also, minimize high-carbohydrate TPN/feedings (RQ = 1.0) to reduce excess CO₂ production.</div>`;
+      }
       else if(highAG) compLine+=` <span class="why" style="display:inline">Note: AG is mildly high (${f1(cAG)}); interpret alongside the clinical picture rather than as a definite second disorder.</span>`;
     }
     else if(primary==='Respiratory alkalosis'){

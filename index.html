@@ -637,6 +637,48 @@
       </div>
 
       <div class="card">
+        <button type="button" class="card-summary" data-collapse="refRespAcid" aria-expanded="false">
+          <span>Respiratory Acidosis Master Framework (Acute vs. Chronic &amp; Mechanical Ventilation)</span>
+          <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="card-body collapsible" id="refRespAcid">
+          <div class="subhead">Compensation Rules &amp; Diagnostic Differentiation (Table 32.1)</div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Type</th><th>Duration</th><th>Renal Compensation Rule</th><th>Expected HCO₃⁻ Formula</th><th>Typical ABG Profile (pCO₂ 70)</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><b>Acute Respiratory Acidosis</b></td>
+                <td>&lt; 12 hours</td>
+                <td>Non-bicarbonate intracellular buffering only (+0.1 mEq/L HCO₃⁻ per 1 mmHg pCO₂)</td>
+                <td>Expected HCO₃⁻ = 24 + [0.1 × (pCO₂ − 40)]</td>
+                <td>pH <b>7.10</b>, pCO₂ 70, HCO₃⁻ <b>27 mEq/L</b></td>
+              </tr>
+              <tr>
+                <td><b>Chronic Respiratory Acidosis</b></td>
+                <td>3–5 days</td>
+                <td>Renal H⁺ excretion &amp; HCO₃⁻ regeneration (+0.4 mEq/L HCO₃⁻ per 1 mmHg pCO₂)</td>
+                <td>Expected HCO₃⁻ = 24 + [0.4 × (pCO₂ − 40)]</td>
+                <td>pH <b>7.34</b>, pCO₂ 70, HCO₃⁻ <b>36 mEq/L</b></td>
+              </tr>
+              <tr>
+                <td><b>Acute-on-Chronic</b></td>
+                <td>Exacerbation</td>
+                <td>Superimposed acute pCO₂ surge on chronic HCO₃⁻ baseline elevation</td>
+                <td>HCO₃⁻ reflects chronic baseline, pH drops &lt; 7.30 with acute pCO₂ surge</td>
+                <td>pH <b>7.28</b>, pCO₂ 88, HCO₃⁻ <b>34 mEq/L</b></td>
+              </tr>
+            </tbody>
+          </table></div>
+          <div class="why" style="margin-top:10px;">
+            <b>Cerebral Vasodilation &amp; Critical Mechanical Ventilation Rules:</b><br>
+            • <b>Nitric-Oxide Cerebral Vasodilation:</b> Hypercapnia causes potent cerebral venular vasodilation, increasing cerebral blood flow and intracranial pressure (ICP) → Hypercapnic encephalopathy, confusion, asterixis, and papilledema.<br>
+            • <b>Post-Hypercapnic Alkalosis Pitfall:</b> During mechanical ventilation for chronic hypercapnia (COPD/OHS), <b>NEVER rapidly blow off pCO₂ to 40 mmHg</b>! Normalizing pCO₂ while serum HCO₃⁻ is chronically elevated (34–38 mEq/L) triggers severe <i>Post-Hypercapnic Metabolic Alkalosis</i> (pH &gt; 7.55) with seizures, arrhythmias, and vasospasm. Target the patient's baseline pH (7.35–7.38) and baseline pCO₂.<br>
+            • <b>Nutritional CO₂ Load:</b> High-carbohydrate TPN/feedings generate excess CO₂ (RQ = 1.0 for carbs vs 0.7 for fat). Calories from fat emulsions reduce VCO₂ and ease weaning from mechanical ventilation.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
         <button type="button" class="card-summary" data-collapse="refDelta" aria-expanded="false">
           <span>Delta gap &amp; osmolal gap</span>
           <svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
