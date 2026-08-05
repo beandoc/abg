@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python3 - /private/tmp/claude-501/-Users-sachinsrivastava-Downloads-ABG-Nephro/b99dc674-3551-4b22-8c49-ee885f8f1450/scratchpad)"
+      "Bash(python3 - /private/tmp/claude-501/-Users-sachinsrivastava-Downloads-ABG-Nephro/b99dc674-3551-4b22-8c49-ee885f8f1450/scratchpad)",
+      "Bash(sed -i '' 's#const p='\\\\''./old/'\\\\'';#const p='\\\\''/private/tmp/claude-501/-Users-sachinsrivastava-Downloads-ABG-Nephro/07f8ad0a-ebcc-4895-87c2-fbd003998ee1/scratchpad/old/'\\\\'';#' /private/tmp/claude-501/-Users-sachinsrivastava-Downloads-ABG-Nephro/07f8ad0a-ebcc-4895-87c2-fbd003998ee1/scratchpad/sweep_old.js)",
+      "Bash(node /private/tmp/claude-501/-Users-sachinsrivastava-Downloads-ABG-Nephro/07f8ad0a-ebcc-4895-87c2-fbd003998ee1/scratchpad/sweep_old.js)"
     ]
   }
 }

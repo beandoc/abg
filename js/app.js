@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     return {
       sampleType: $('sampleType') ? $('sampleType').value : 'ABG',
       ph:num('ph'),pco2:num('pco2'),hco3:num('hco3'),pvco2:num('pvco2'),na:num('na'),k:num('k'),cl:num('cl'),
-      lactate:num('lactate'),albumin:num('albumin'),creatinine:num('creatinine'),urea:num('urea'),bun:num('bun'),glucose:num('glucose'),
-      measuredOsm:num('measuredOsm'),uNa:num('uNa'),uK:num('uK'),uCl:num('uCl'),
+      lactate:num('lactate'),albumin:num('albumin'),iCa:num('iCa'),creatinine:num('creatinine'),urea:num('urea'),bun:num('bun'),glucose:num('glucose'),
+      measuredOsm:num('measuredOsm'),uNa:num('uNa'),uK:num('uK'),uCl:num('uCl'),isPregnant:$('isPregnant') ? $('isPregnant').value === 'true' : false,
       vent:{mode:$('ventMode').value,fio2:num('fio2'),pao2:num('pao2'),weight:num('weight'),
             tidalVolume:num('tidalVolume'),respRate:num('respRate'),peep:num('peep')}
     };
@@ -61,48 +61,53 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderExecutiveSummary(r, d){
-    const phStatus = d.ph < 7.35 ? 'Acidemia' : d.ph > 7.45 ? 'Alkalemia' : 'Normal pH';
+    // Read the ANALYSED values, never the raw form inputs. analyze() converts a VBG to its ABG
+    // equivalent internally, so a card fed the raw entries announced "pH 7.33 Acidemia" directly
+    // beside a diagnosis header reading "Normal acid–base status".
+    const ph = r.ph, pco2 = r.pco2, hco3 = r.hco3;
+    const isVBG = d.sampleType && d.sampleType.startsWith('VBG');
+
+    const phStatus = ph < 7.35 ? 'Acidemia' : ph > 7.45 ? 'Alkalemia' : 'Normal pH';
     const agVal = r.cAG != null ? r.cAG.toFixed(1) : (r.ag != null ? r.ag.toFixed(1) : null);
 
-    let deltaRatioStr = null;
-    if(r.cAG != null && r.cAG > 12 && d.hco3 != null && d.hco3 < 24){
-      const dAG = r.cAG - 12;
-      const dHCO3 = 24 - d.hco3;
-      if(dHCO3 > 0) deltaRatioStr = (dAG / dHCO3).toFixed(2);
-    }
+    // The gap verdict and the delta ratio both come from the engine. Re-deriving them here
+    // against a different threshold (>12) meant the card could read "High AG" and print a delta
+    // ratio while Step 4 said "borderline" and the engine emitted no delta step at all.
+    const agSub = r.agState === 'high' ? 'High AG'
+                : r.agState === 'borderline' ? 'Borderline AG'
+                : r.agState === 'low' ? 'Low AG (abnormal)'
+                : r.agState === 'n/a' ? 'Not calculated'
+                : 'Normal AG';
+    const agClass = r.agState === 'high' ? 'acid' : r.agState === 'low' ? 'warn' : '';
 
-    let deltaSub = 'NAGMA';
-    if(deltaRatioStr !== null){
-      const val = parseFloat(deltaRatioStr);
-      if(val < 1.0) deltaSub = 'NAGMA (<1.0)';
-      else if(val <= 2.0) deltaSub = 'Pure HAGMA (1.0–2.0)';
-      else deltaSub = 'Met Alk (>2.0)';
-    }
+    const deltaRatioStr = (r.delta && r.delta.ratio != null) ? r.delta.ratio.toFixed(2) : null;
+    const deltaSub = r.delta ? r.delta.label : '';
 
     return `
+      ${isVBG ? `<div class="vbg-converted-note">Venous sample — metrics below are the <b>estimated arterial equivalents</b> (pH ${ph.toFixed(2)}, pCO₂ ${f1(pco2)}, HCO₃⁻ ${f1(hco3)}) used for the interpretation, not the values as entered.</div>` : ''}
       <div class="executive-summary-card">
         <div class="exec-summary-head">⚡ Core Clinical Metrics &amp; Key Findings</div>
         <div class="exec-metrics-grid">
           <div class="exec-metric">
             <span class="lbl">pH</span>
-            <span class="val ${d.ph < 7.35 ? 'acid' : d.ph > 7.45 ? 'alk' : ''}">${d.ph.toFixed(2)}</span>
+            <span class="val ${ph < 7.35 ? 'acid' : ph > 7.45 ? 'alk' : ''}">${ph.toFixed(2)}</span>
             <span class="sub">${phStatus}</span>
           </div>
           <div class="exec-metric">
             <span class="lbl">pCO₂</span>
-            <span class="val">${d.pco2} <small>mmHg</small></span>
-            <span class="sub">${d.pco2 < 35 ? 'Low' : d.pco2 > 45 ? 'High' : 'Normal'}</span>
+            <span class="val">${f1(pco2)} <small>mmHg</small></span>
+            <span class="sub">${pco2 < 35 ? 'Low' : pco2 > 45 ? 'High' : 'Normal'}</span>
           </div>
           <div class="exec-metric">
             <span class="lbl">HCO₃⁻</span>
-            <span class="val">${d.hco3} <small>mEq/L</small></span>
-            <span class="sub">${d.hco3 < 22 ? 'Low' : d.hco3 > 26 ? 'High' : 'Normal'}</span>
+            <span class="val">${f1(hco3)} <small>mEq/L</small></span>
+            <span class="sub">${hco3 < 22 ? 'Low' : hco3 > 26 ? 'High' : 'Normal'}</span>
           </div>
           ${agVal !== null ? `
           <div class="exec-metric">
             <span class="lbl">Corr. AG</span>
-            <span class="val ${parseFloat(agVal) > 12 ? 'acid' : ''}">${agVal} <small>mEq/L</small></span>
-            <span class="sub">${parseFloat(agVal) > 12 ? 'High AG' : 'Normal AG'}</span>
+            <span class="val ${agClass}">${agVal} <small>mEq/L</small></span>
+            <span class="sub">${agSub}</span>
           </div>
           ` : ''}
           ${deltaRatioStr !== null ? `

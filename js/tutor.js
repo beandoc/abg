@@ -86,29 +86,33 @@ ABG.Tutor = (function(){
   }
 
   function renderGauges(r, data){
-    const { ph, pco2, hco3, na, cl, albumin, lactate } = data;
-    const ag = r.ag != null ? r.ag : (na != null && cl != null && hco3 != null ? na - (cl + hco3) : null);
-    const cAG = r.cAG != null ? r.cAG : ag;
+    // Use the analysed values, not the raw form entries — for a VBG these differ, and the gauge
+    // was drawing a target band from raw HCO₃⁻ against a marker at the raw pCO₂ while the
+    // step transcript beside it reasoned over the converted arterial equivalents.
+    const pco2 = r.pco2, hco3 = r.hco3;
     
-    // 1. Expected pCO2 Gauge
-    let expPCO2Min = 35, expPCO2Max = 45, expPCO2Mid = 40;
-    if(hco3 != null){
-      expPCO2Mid = 40 - 1.2 * (24 - hco3); // or Winter's 1.5*hco3 + 8
+    // 1. Expected pCO2 Gauge — Winter's formula target depends on which side (met acid vs met alk)
+    // is primary; it isn't meaningful when the primary disorder is respiratory (compensation there
+    // is renal/HCO3-based, not a pCO2 target), so leave it unset in that case.
+    let expPCO2Min = null, expPCO2Max = null, expPCO2Mid = null;
+    if(hco3 != null && r.primary === 'Metabolic acidosis'){
+      expPCO2Mid = 40 - 1.2 * (24 - hco3);
+    } else if(hco3 != null && r.primary === 'Metabolic alkalosis'){
+      expPCO2Mid = 40 + 0.7 * (hco3 - 24);
+    }
+    if(expPCO2Mid != null){
       expPCO2Min = Math.max(10, expPCO2Mid - 2);
       expPCO2Max = expPCO2Mid + 2;
     }
 
     const pco2Pct = Math.min(100, Math.max(0, ((pco2 - 15) / 55) * 100));
-    const expMinPct = Math.min(100, Math.max(0, ((expPCO2Min - 15) / 55) * 100));
-    const expMaxPct = Math.min(100, Math.max(0, ((expPCO2Max - 15) / 55) * 100));
+    const expMinPct = expPCO2Min != null ? Math.min(100, Math.max(0, ((expPCO2Min - 15) / 55) * 100)) : null;
+    const expMaxPct = expPCO2Max != null ? Math.min(100, Math.max(0, ((expPCO2Max - 15) / 55) * 100)) : null;
 
-    // 2. Delta Ratio Gauge
-    let deltaRatioVal = null;
-    if(cAG != null && cAG > 12 && hco3 != null && hco3 < 24){
-      const dAG = cAG - 12;
-      const dHCO3 = 24 - hco3;
-      if(dHCO3 > 0) deltaRatioVal = dAG / dHCO3;
-    }
+    // 2. Delta Ratio Gauge — take the engine's ratio so the gauge, the summary card and Step 8
+    // can never disagree. Re-deriving it here against a >12 threshold drew a delta marker for
+    // gaps the engine classed as borderline and for which it emitted no delta-gap step.
+    const deltaRatioVal = (r.delta && r.delta.ratio != null) ? r.delta.ratio : null;
 
     let deltaPosPct = 50;
     if(deltaRatioVal != null){
@@ -124,17 +128,17 @@ ABG.Tutor = (function(){
             <span class="gauge-val">${pco2 != null ? pco2 + ' mmHg' : 'N/A'}</span>
           </div>
           <div class="gauge-bar-track">
-            <div class="gauge-target-range" style="left:${expMinPct}%; width:${Math.max(4, expMaxPct - expMinPct)}%;" title="Expected pCO₂ range (${expPCO2Min.toFixed(1)}–${expPCO2Max.toFixed(1)} mmHg)"></div>
+            ${expMinPct != null ? `<div class="gauge-target-range" style="left:${expMinPct}%; width:${Math.max(4, expMaxPct - expMinPct)}%;" title="Expected pCO₂ range (${expPCO2Min.toFixed(1)}–${expPCO2Max.toFixed(1)} mmHg)"></div>` : ''}
             <div class="gauge-marker" style="left:${pco2Pct}%;" title="Measured pCO₂ (${pco2} mmHg)"></div>
           </div>
           <div class="gauge-labels">
             <span>15 mmHg</span>
-            <span style="color:var(--accent)">Target Expected: ${expPCO2Min.toFixed(1)}–${expPCO2Max.toFixed(1)}</span>
+            <span style="color:var(--accent)">${expPCO2Min != null ? `Target Expected: ${expPCO2Min.toFixed(1)}–${expPCO2Max.toFixed(1)}` : 'Winter\'s target (metabolic-primary only)'}</span>
             <span>70 mmHg</span>
           </div>
         </div>
 
-        ${cAG != null && cAG > 12 ? `
+        ${deltaRatioVal != null ? `
         <div class="gauge-block" style="margin-top:14px;">
           <div class="gauge-title">
             <span>ΔAG / ΔHCO₃⁻ Delta Ratio Spectrum</span>
@@ -273,7 +277,9 @@ ABG.Tutor = (function(){
       html += renderLacticClassifier(d.lactate);
     }
 
-    if(r.agState === 'high' || (r.cAG != null && r.cAG > 12)){
+    // Match the engine's verdict. Showing the GOLDMARK high-AG differential off a >12 cutoff
+    // put a high-AG workup on screen while the diagnosis header read "Normal-anion-gap".
+    if(r.agState === 'high' || r.agState === 'borderline'){
       html += renderGoldmarkMatrix();
     }
 

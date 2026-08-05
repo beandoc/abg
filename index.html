@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0B6E4F">
 <title>Acid–Base &amp; Nephrology Analyzer</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=2">
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 </head>
 <body>
@@ -112,6 +112,8 @@
                 <div class="fld"><label for="patientAge">Age</label><input type="number" id="patientAge" step="1" placeholder="years"></div>
                 <div class="fld"><label for="patientSex">Sex</label>
                   <select id="patientSex"><option value="">—</option><option value="M">Male</option><option value="F">Female</option></select></div>
+                <div class="fld" id="pregFld"><label for="isPregnant">Pregnant?</label>
+                  <select id="isPregnant"><option value="false">No</option><option value="true">Yes (2nd/3rd trimester)</option></select></div>
                 <div class="fld"><label for="patientHeight">Height (cm)</label><input type="number" id="patientHeight" step="1" placeholder="e.g. 175"></div>
                 <div class="fld"><label for="patientWeight">Weight (kg)</label><input type="number" id="patientWeight" step="0.1" placeholder="dosing weight"></div>
               </div>
@@ -148,6 +150,7 @@
                   <div class="fld"><label for="k">K⁺</label><input type="number" id="k" step="0.1" placeholder="3.5–5.0"></div>
                   <div class="fld"><label for="cl">Cl⁻</label><input type="number" id="cl" step="1" placeholder="98–106"></div>
                   <div class="fld"><label for="lactate">Lactate (mmol/L)</label><input type="number" id="lactate" step="0.1" placeholder="< 2.0"></div>
+                  <div class="fld"><label for="iCa">iCa²⁺ (mmol/L)</label><input type="number" id="iCa" step="0.01" placeholder="1.12–1.30"></div>
                   <div class="fld"><label for="albumin">Albumin (g/dL)</label><input type="number" id="albumin" step="0.1" placeholder="3.5–5.0"></div>
                 </div>
               </div>
@@ -933,17 +936,17 @@
 </div>
 
 <script src="js/calculators.js"></script>
-<script src="js/interpreter.js?v=3"></script>
+<script src="js/interpreter.js?v=5"></script>
 <script src="js/davenport.js?v=2"></script>
 <script src="js/trend.js"></script>
 <script src="js/patient.js"></script>
 <script src="js/patientVault.js"></script>
 <script src="js/export.js"></script>
 <script src="js/nephro.js"></script>
-<script src="js/alkalosis.js"></script>
+<script src="js/alkalosis.js?v=2"></script>
 <script src="js/ventsim.js"></script>
-<script src="js/tutor.js"></script>
-<script src="js/app.js?v=2"></script>
+<script src="js/tutor.js?v=3"></script>
+<script src="js/app.js?v=3"></script>
 <script src="js/shell.js"></script>
 </body>
 </html>

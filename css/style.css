@@ -179,7 +179,16 @@ body{font-family:var(--font); background:var(--bg); color:var(--ink); line-heigh
 .exec-metric .val small { font-size: 0.68rem; font-weight: 600; color: var(--muted2); }
 .exec-metric .val.acid { color: var(--acid); }
 .exec-metric .val.alk { color: var(--alk); }
+.exec-metric .val.warn { color: var(--warn-ink); }
 .exec-metric .sub { font-size: 0.65rem; font-weight: 700; color: var(--accent-dk); }
+
+/* Venous samples are interpreted after conversion to their arterial equivalent; this banner
+   states that the metrics shown are the converted values, not the numbers as typed. */
+.vbg-converted-note {
+  background: var(--warn-bg); border: 1px solid var(--warn); border-radius: 10px;
+  padding: 8px 12px; margin-bottom: 10px;
+  font-size: 0.74rem; font-weight: 600; color: var(--warn-ink); line-height: 1.45;
+}
 
 .steps-transcript-accordion {
   background: #FFFFFF; border: 1px solid var(--line); border-radius: 12px;
