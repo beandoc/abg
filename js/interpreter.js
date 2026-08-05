@@ -207,12 +207,14 @@ ABG.Interpreter = (function(){
       const {dAG,dHCO3,ratio}=C.deltaRatio(cAG,hco3,N_AG,N_HCO3);
       if(dHCO3>0){
         let txt;
-        if(ratio<0.4){txt='ratio < 0.4 → mainly a normal-AG acidosis'; disorders.push('concurrent normal-AG metabolic acidosis');}
-        else if(ratio<1){txt='ratio 0.4–1 → mixed high-AG + normal-AG acidosis'; disorders.push('concurrent normal-AG metabolic acidosis');}
-        else if(ratio<=2){txt='ratio 1–2 → pure high-AG metabolic acidosis';}
-        else {txt='ratio > 2 → concurrent metabolic alkalosis (or chronic respiratory acidosis)'; disorders.push('concurrent metabolic alkalosis');}
-        S('Step 8 · ΔAG/ΔHCO₃⁻ ratio',
-          `ΔAG ${f1(dAG)} / ΔHCO₃⁻ ${f1(dHCO3)} = <span class="val">${ratio.toFixed(2)}</span> — ${txt}.`);
+        if(ratio<0.4){txt='ratio < 0.4 → mainly a normal-anion-gap (hyperchloremic) acidosis'; disorders.push('concurrent normal-AG metabolic acidosis');}
+        else if(ratio<1.0){txt='ratio 0.4–1.0 → mixed high-AG + normal-AG (hyperchloremic) metabolic acidosis (e.g. diarrhea + lactic acidosis)'; disorders.push('concurrent normal-AG metabolic acidosis');}
+        else if(ratio<=1.6){txt='ratio 1.0–1.6 → pure high-AG metabolic acidosis (ratio 1.6 specifically typical of pure lactic acidosis due to intracellular non-HCO₃⁻ buffering & low renal clearance)';}
+        else if(ratio<=2.0){txt='ratio 1.6–2.0 → pure high-AG metabolic acidosis';}
+        else {txt='ratio > 2.0 → concurrent metabolic alkalosis (or pre-existing chronic hypercapnia with high baseline HCO₃⁻)'; disorders.push('concurrent metabolic alkalosis');}
+        S('Step 8 · ΔAG/ΔHCO₃⁻ ratio (Delta Gap)',
+          `ΔAG ${f1(dAG)} / ΔHCO₃⁻ ${f1(dHCO3)} = <span class="val">${ratio.toFixed(2)}</span> — ${txt}.`
+          + `<div class="why"><b>Clinical Interpretation:</b> Ratio 1.0–1.6 indicates pure HAGMA (1.6 specifically typical for pure Lactic Acidosis). Ratio &lt; 1.0 indicates mixed HAGMA + Normal-AG (hyperchloremic) acidosis. Ratio &gt; 2.0 indicates mixed HAGMA + Metabolic Alkalosis (HCO₃⁻ inappropriately high).</div>`);
       }
     }
 
