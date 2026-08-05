@@ -59,6 +59,20 @@ ABG.Calculators = (function(){
     };
   }
 
+  // Stool Osmolal Gap: Stool Osm (measured) - [2 * (Stool Na + Stool K)]. Gap >= 50 mOsm/kg -> Osmotic diarrhea; Gap < 50 mOsm/kg -> Secretory diarrhea.
+  function stoolOsmolalGap(measuredOsm, stoolNa, stoolK){
+    if(measuredOsm == null || stoolNa == null || stoolK == null) return null;
+    const calc = 2 * (stoolNa + stoolK);
+    const gap = Math.round((measuredOsm - calc) * 10) / 10;
+    const isOsmotic = gap >= 50;
+    return {
+      calcOsm: Math.round(calc * 10) / 10,
+      gap,
+      isOsmotic,
+      type: isOsmotic ? 'Osmotic diarrhea (laxatives / lactulose / unabsorbed carbohydrates)' : 'Secretory diarrhea (enterotoxins / VIPoma / cholera / bile acids)'
+    };
+  }
+
   // Alveolar gas equation at sea level (Patm 760, PH2O 47, R 0.8).
   function alveolarPO2(pco2, fio2Pct){
     return (fio2Pct / 100) * (760 - 47) - pco2 / 0.8;
@@ -179,7 +193,7 @@ ABG.Calculators = (function(){
     metAcidExpectedPCO2, metAlkExpectedPCO2,
     respAcidAcuteHCO3, respAcidChronicHCO3, respAlkAcuteHCO3, respAlkChronicHCO3,
     anionGap, correctedAnionGap, deltaRatio,
-    calcOsm, osmolalGap, urineAnionGap, urineOsmolalGap, alveolarPO2, aaGradient, calcIBW, ibwPerKg, vbgToAbg, pvPaCO2Gap, naClRatio,
+    calcOsm, osmolalGap, urineAnionGap, urineOsmolalGap, stoolOsmolalGap, alveolarPO2, aaGradient, calcIBW, ibwPerKg, vbgToAbg, pvPaCO2Gap, naClRatio,
     minuteVentilation, predictedPCO2FromVE, alveolarVentilation, acuteHCO3Shift,
     clDeficit, salineVolumeL, hPlusDeficit, hclVolumeL,
     plateauPressure, drivingPressure, staticCompliance, pfRatio, aAratio, peakPressure, mechanicalPower,
