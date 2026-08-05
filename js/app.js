@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return {
       sampleType: $('sampleType') ? $('sampleType').value : 'ABG',
       ph:num('ph'),pco2:num('pco2'),hco3:num('hco3'),pvco2:num('pvco2'),na:num('na'),k:num('k'),cl:num('cl'),
-      lactate:num('lactate'),albumin:num('albumin'),bun:num('bun'),glucose:num('glucose'),
+      lactate:num('lactate'),albumin:num('albumin'),creatinine:num('creatinine'),urea:num('urea'),bun:num('bun'),glucose:num('glucose'),
       measuredOsm:num('measuredOsm'),uNa:num('uNa'),uK:num('uK'),uCl:num('uCl'),
       vent:{mode:$('ventMode').value,fio2:num('fio2'),pao2:num('pao2'),weight:num('weight'),
             tidalVolume:num('tidalVolume'),respRate:num('respRate'),peep:num('peep')}
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const banner = $('vbgHintBanner');
     if(banner) banner.style.display = (d.sampleType && d.sampleType.startsWith('VBG')) ? 'block' : 'none';
     setVal('lactate', d.lactate); setVal('albumin', d.albumin);
-    setVal('bun', d.bun); setVal('glucose', d.glucose);
+    setVal('creatinine', d.creatinine); setVal('urea', d.urea); setVal('bun', d.bun); setVal('glucose', d.glucose);
     setVal('measuredOsm', d.measuredOsm);
     setVal('uNa', d.uNa); setVal('uK', d.uK); setVal('uCl', d.uCl);
     if(d.vent){
@@ -122,6 +122,37 @@ document.addEventListener('DOMContentLoaded', () => {
       setVal('weight', d.vent.weight); setVal('tidalVolume', d.vent.tidalVolume);
       setVal('respRate', d.vent.respRate); setVal('peep', d.vent.peep);
     }
+  }
+
+  // Bi-directional conversion & sync between Serum Urea (mg/dL) and BUN (mg/dL)
+  // BUN (mg/dL) = Serum Urea (mg/dL) / 2.14
+  const ureaEl = $('urea');
+  const bunEl = $('bun');
+  if(ureaEl && bunEl){
+    ureaEl.addEventListener('input', () => {
+      const u = parseFloat(ureaEl.value);
+      if(!isNaN(u) && u > 0){
+        bunEl.value = (u / 2.14).toFixed(1);
+      } else if(ureaEl.value === '') {
+        bunEl.value = '';
+      }
+    });
+    bunEl.addEventListener('input', () => {
+      const b = parseFloat(bunEl.value);
+      if(!isNaN(b) && b > 0){
+        ureaEl.value = Math.round(b * 2.14);
+      } else if(bunEl.value === '') {
+        ureaEl.value = '';
+      }
+    });
+  }
+
+  // Bi-directional sync between main form Creatinine and Nephrology Creatinine
+  const crEl = $('creatinine');
+  const nCrEl = $('nCreatinine');
+  if(crEl && nCrEl){
+    crEl.addEventListener('input', () => { nCrEl.value = crEl.value; });
+    nCrEl.addEventListener('input', () => { crEl.value = nCrEl.value; });
   }
 
   function loadCaseRecord(caseId){

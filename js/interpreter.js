@@ -16,7 +16,7 @@ ABG.Interpreter = (function(){
       ph = conv.ph; pco2 = conv.pco2; hco3 = conv.hco3;
     }
 
-    const {na=null,k=null,cl=null,lactate=null,albumin=null,bun=null,glucose=null,measuredOsm=null,pvco2=null,uNa=null,uK=null,uCl=null,vent={}}=d;
+    const {na=null,k=null,cl=null,lactate=null,albumin=null,creatinine=null,urea=null,bun=null,glucose=null,measuredOsm=null,pvco2=null,uNa=null,uK=null,uCl=null,vent={}}=d;
     const steps=[]; let dxClass='';
     const S=(h,b)=>steps.push({h,b});
 
