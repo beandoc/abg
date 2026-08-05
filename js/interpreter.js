@@ -134,6 +134,19 @@ ABG.Interpreter = (function(){
           `AG = ${na} − (${cl} + ${f1(hco3)}) = <span class="val">${f1(ag)}</span> (${agState}). Albumin not entered — correction not applied.`
           + (agState==='low'?`<div class="why">A low AG is itself abnormal — consider hypoalbuminaemia (commonest), or unmeasured cations (e.g. IgG paraproteinaemia, lithium, severe hypercalcaemia).</div>`:'') + agNote);
       }
+      const nacl = C.naClRatio(na, cl);
+      if(nacl){
+        let naclMsg = `Na⁺:Cl⁻ ratio = ${na} / ${cl} = <span class="val">${nacl.ratio.toFixed(2)}</span> (normal baseline 1.40:1).`;
+        if(nacl.state === 'high'){
+          naclMsg += ` <span class="fa">High ratio (&gt; 1.45) → Disproportionate hypochloremia relative to Na⁺ (points to Metabolic Alkalosis or Chronic Respiratory Acidosis).</span>`;
+        } else if(nacl.state === 'low'){
+          naclMsg += ` <span class="fa">Low ratio (&lt; 1.35) → Disproportionate hyperchloremia relative to Na⁺ (points to Normal-AG Metabolic Acidosis or Chronic Respiratory Alkalosis).</span>`;
+        } else {
+          naclMsg += ` Normal ratio (1.35–1.45) → Na⁺ and Cl⁻ move proportionately, reflecting pure hydration status (overhydration/dehydration) rather than primary acid–base chloride shift.`;
+        }
+        S('Na⁺:Cl⁻ ratio (Hydration vs. Acid-Base Shift)',
+          naclMsg + `<div class="why">In pure hydration disorders, Na⁺ and Cl⁻ decrease or increase proportionately to preserve the 1.4:1 ratio. Disproportionate chloride shifts indicate primary acid-base disturbances.</div>`);
+      }
     } else {
       S('Step 4 · Anion gap', `Not calculated (Na⁺ or Cl⁻ missing). The AG is the single most important step for uncovering hidden acidosis — enter electrolytes.`);
     }

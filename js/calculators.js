@@ -74,6 +74,16 @@ ABG.Calculators = (function(){
     };
   }
 
+  // Na+:Cl- ratio analysis (normal baseline 1.4:1). Distinguishes pure hydration state changes (1.4:1 preserved) from primary acid-base chloride disturbances.
+  function naClRatio(na, cl){
+    if(na == null || cl == null || cl === 0) return null;
+    const ratio = Math.round((na / cl) * 100) / 100;
+    let state = 'normal';
+    if(ratio > 1.45) state = 'high'; // Disproportionate hypochloremia -> Met Alk or Chronic Resp Acid
+    else if(ratio < 1.35) state = 'low'; // Disproportionate hyperchloremia -> NAGMA or Chronic Resp Alk
+    return { ratio, state };
+  }
+
   // Devine Formula for Ideal Body Weight (ARDSNet Standard)
   function calcIBW(heightCm, sex){
     if(!heightCm || heightCm < 100) return null;
@@ -155,7 +165,7 @@ ABG.Calculators = (function(){
     metAcidExpectedPCO2, metAlkExpectedPCO2,
     respAcidAcuteHCO3, respAcidChronicHCO3, respAlkAcuteHCO3, respAlkChronicHCO3,
     anionGap, correctedAnionGap, deltaRatio,
-    calcOsm, osmolalGap, urineAnionGap, alveolarPO2, aaGradient, calcIBW, ibwPerKg, vbgToAbg, pvPaCO2Gap,
+    calcOsm, osmolalGap, urineAnionGap, alveolarPO2, aaGradient, calcIBW, ibwPerKg, vbgToAbg, pvPaCO2Gap, naClRatio,
     minuteVentilation, predictedPCO2FromVE, alveolarVentilation, acuteHCO3Shift,
     clDeficit, salineVolumeL, hPlusDeficit, hclVolumeL,
     plateauPressure, drivingPressure, staticCompliance, pfRatio, aAratio, peakPressure, mechanicalPower,
