@@ -224,15 +224,32 @@ ABG.Interpreter = (function(){
         `pH ${ph.toFixed(2)} is within the normal range despite an abnormal ${primary.includes('Respiratory')?'PaCO₂':'HCO₃⁻'} — compensation limits but never fully normalizes pH, so a normal pH here proves a second, offsetting disorder: <b>${forcedMixed}</b>.`);
     }
 
-    if(highAG && primary==='Metabolic acidosis'){
+    if(highAG){
+      if(!disorders.some(x=>x.toLowerCase().includes('anion-gap'))){
+        disorders.push('concurrent high-anion-gap metabolic acidosis');
+      }
       const {dAG,dHCO3,ratio}=C.deltaRatio(cAG,hco3,N_AG,N_HCO3);
-      if(dHCO3>0){
+      if(dHCO3<=0){
+        if(dAG>10 && !disorders.some(x=>x.toLowerCase().includes('alkalosis'))){
+          disorders.push('concurrent metabolic alkalosis');
+        }
+        S('Step 8 · ΔAG/ΔHCO₃⁻ ratio (Delta Gap)',
+          `ΔAG ${f1(dAG)} with serum HCO₃⁻ ${f1(hco3)} (no HCO₃⁻ deficit) — <b>concurrent metabolic alkalosis</b> is elevating bicarbonate back to normal or high levels despite unmeasured acid accumulation.`);
+      } else {
         let txt;
-        if(ratio<0.4){txt='ratio < 0.4 → mainly a normal-anion-gap (hyperchloremic) acidosis'; disorders.push('concurrent normal-AG metabolic acidosis');}
-        else if(ratio<1.0){txt='ratio 0.4–1.0 → mixed high-AG + normal-AG (hyperchloremic) metabolic acidosis (e.g. diarrhea + lactic acidosis)'; disorders.push('concurrent normal-AG metabolic acidosis');}
+        if(ratio<0.4){txt='ratio < 0.4 → mainly a normal-anion-gap (hyperchloremic) acidosis'; if(!disorders.includes('concurrent normal-AG metabolic acidosis')) disorders.push('concurrent normal-AG metabolic acidosis');}
+        else if(ratio<1.0){txt='ratio 0.4–1.0 → mixed high-AG + normal-AG (hyperchloremic) metabolic acidosis (e.g. diarrhea + lactic acidosis)'; if(!disorders.includes('concurrent normal-AG metabolic acidosis')) disorders.push('concurrent normal-AG metabolic acidosis');}
         else if(ratio<=1.6){txt='ratio 1.0–1.6 → pure high-AG metabolic acidosis (ratio 1.6 specifically typical of pure lactic acidosis due to intracellular non-HCO₃⁻ buffering & low renal clearance)';}
-        else if(ratio<=2.0){txt='ratio 1.6–2.0 → pure high-AG metabolic acidosis';}
-        else {txt='ratio > 2.0 → concurrent metabolic alkalosis (or pre-existing chronic hypercapnia with high baseline HCO₃⁻)'; disorders.push('concurrent metabolic alkalosis');}
+        else if(ratio<=2.0){
+          const isHypoCl = cl!==null && na!==null && (na/cl > 1.48 || cl < 90);
+          if(isHypoCl){
+            txt=`ratio ${ratio.toFixed(2)} with disproportionate hypochloremia (Cl⁻ ${cl} mEq/L) → concurrent metabolic alkalosis (e.g. vomiting / diuretics)`;
+            if(!disorders.includes('concurrent metabolic alkalosis')) disorders.push('concurrent metabolic alkalosis');
+          } else {
+            txt='ratio 1.6–2.0 → pure high-AG metabolic acidosis';
+          }
+        }
+        else {txt='ratio > 2.0 → concurrent metabolic alkalosis (or pre-existing chronic hypercapnia with high baseline HCO₃⁻)'; if(!disorders.includes('concurrent metabolic alkalosis')) disorders.push('concurrent metabolic alkalosis');}
         S('Step 8 · ΔAG/ΔHCO₃⁻ ratio (Delta Gap)',
           `ΔAG ${f1(dAG)} / ΔHCO₃⁻ ${f1(dHCO3)} = <span class="val">${ratio.toFixed(2)}</span> — ${txt}.`
           + `<div class="why"><b>Clinical Interpretation:</b> Ratio 1.0–1.6 indicates pure HAGMA (1.6 specifically typical for pure Lactic Acidosis). Ratio &lt; 1.0 indicates mixed HAGMA + Normal-AG (hyperchloremic) acidosis. Ratio &gt; 2.0 indicates mixed HAGMA + Metabolic Alkalosis (HCO₃⁻ inappropriately high).</div>`);
