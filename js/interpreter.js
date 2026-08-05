@@ -7,9 +7,25 @@ ABG.Interpreter = (function(){
   const f1 = x => (Math.round(x*10)/10).toFixed(1);
 
   function analyze(d){
-    const {ph,pco2,hco3,na,k,cl,lactate,albumin,bun,glucose,measuredOsm,uNa,uK,uCl,vent}=d;
+    const isVBG = d.sampleType && d.sampleType.startsWith('VBG');
+    const rawPh = d.ph, rawPco2 = d.pco2, rawHco3 = d.hco3;
+
+    let ph = rawPh, pco2 = rawPco2, hco3 = rawHco3;
+    if(isVBG && rawPh !== null && rawPco2 !== null && rawHco3 !== null){
+      const conv = C.vbgToAbg(rawPh, rawPco2, rawHco3);
+      ph = conv.ph; pco2 = conv.pco2; hco3 = conv.hco3;
+    }
+
+    const {na,k,cl,lactate,albumin,bun,glucose,measuredOsm,pvco2,uNa,uK,uCl,vent}=d;
     const steps=[]; let dxClass='';
     const S=(h,b)=>steps.push({h,b});
+
+    if(isVBG && rawPh !== null && rawPco2 !== null && rawHco3 !== null){
+      S('Sample Source · Venous Blood Gas (VBG)',
+        `Entered VBG values: pH ${rawPh.toFixed(2)}, pCO₂ ${rawPco2} mmHg, HCO₃⁻ ${rawHco3} mEq/L.<br>` +
+        `<b>Estimated ABG Equivalent:</b> pH <span class="val">${ph.toFixed(2)}</span> (+0.03), pCO₂ <span class="val">${f1(pco2)}</span> mmHg (−6.0), HCO₃⁻ <span class="val">${f1(hco3)}</span> mEq/L (−1.5).` +
+        `<div class="why">In normal physiology, arteriovenous blood gas differences are minor. However, in severe low cardiac output states, tissue CO₂ stagnation elevates venous pCO₂ while arterial pCO₂ remains normal due to intact pulmonary ventilation.</div>`);
+    }
 
     const Hcalc = C.hendersonH(pco2, hco3);
     const Hmeas = C.hFromPh(ph);
@@ -230,6 +246,20 @@ ABG.Interpreter = (function(){
       S('A–a gradient',
         `A–a = ${f1(PAO2)} − ${f1(vent.pao2)} = <span class="val">${f1(aa)}</span> mmHg (FiO₂ ${fio2Pct}%).`
         +`<div class="why">Room-air upper limit ≈ (age/4)+4. A widened gradient points to V/Q mismatch, shunt, or diffusion defect rather than pure hypoventilation — useful when hypercapnia is present but the lungs may also be the problem.</div>`);
+    }
+
+    if(pvco2 !== null && pco2 !== null){
+      const gapRes = C.pvPaCO2Gap(pvco2, pco2);
+      if(gapRes){
+        let line = `P(v-a)CO₂ gap = ${pvco2} − ${f1(pco2)} = <span class="val">${f1(gapRes.gap)}</span> mmHg (normal ≤ 6.0 mmHg).`;
+        if(gapRes.isHigh){
+          line += ` <span class="fa">Elevated P(v-a)CO₂ gap (&gt; 6.0 mmHg) → Suspect Low Cardiac Output / Circulatory Shock / Tissue Hypoperfusion State.</span>` +
+                  `<div class="why">In low cardiac output / shock states, arterial pCO₂ may remain deceptively normal (due to lung hyperventilation), while central venous pCO₂ (PvCO₂) is markedly elevated due to tissue CO₂ stagnation and sluggish tissue perfusion.</div>`;
+        } else {
+          line += ` Normal P(v-a)CO₂ gap (≤ 6.0 mmHg) → indicates adequate tissue perfusion &amp; cardiac output.`;
+        }
+        S('Arteriovenous pCO₂ gap', line);
+      }
     }
 
     const uniq=[...new Set(disorders)];

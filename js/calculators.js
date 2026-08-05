@@ -55,6 +55,25 @@ ABG.Calculators = (function(){
     return { PAO2, aa: PAO2 - pao2 };
   }
 
+  // VBG to ABG conversion (standard clinical offset: pH +0.03, pCO2 -6, HCO3 -1.5)
+  function vbgToAbg(vbgPh, vbgPco2, vbgHco3){
+    return {
+      ph: vbgPh != null ? Math.round((vbgPh + 0.03)*100)/100 : null,
+      pco2: vbgPco2 != null ? Math.max(10, Math.round((vbgPco2 - 6)*10)/10) : null,
+      hco3: vbgHco3 != null ? Math.max(1, Math.round((vbgHco3 - 1.5)*10)/10) : null
+    };
+  }
+
+  // Venous-to-Arterial pCO2 gap (P(v-a)CO2): normal <= 6 mmHg. >6 mmHg indicates low cardiac output / shock.
+  function pvPaCO2Gap(pvCO2, paCO2){
+    if(pvCO2 == null || paCO2 == null) return null;
+    const gap = pvCO2 - paCO2;
+    return {
+      gap: Math.round(gap * 10) / 10,
+      isHigh: gap > 6.0
+    };
+  }
+
   // Devine Formula for Ideal Body Weight (ARDSNet Standard)
   function calcIBW(heightCm, sex){
     if(!heightCm || heightCm < 100) return null;
@@ -136,7 +155,7 @@ ABG.Calculators = (function(){
     metAcidExpectedPCO2, metAlkExpectedPCO2,
     respAcidAcuteHCO3, respAcidChronicHCO3, respAlkAcuteHCO3, respAlkChronicHCO3,
     anionGap, correctedAnionGap, deltaRatio,
-    calcOsm, osmolalGap, urineAnionGap, alveolarPO2, aaGradient, calcIBW, ibwPerKg,
+    calcOsm, osmolalGap, urineAnionGap, alveolarPO2, aaGradient, calcIBW, ibwPerKg, vbgToAbg, pvPaCO2Gap,
     minuteVentilation, predictedPCO2FromVE, alveolarVentilation, acuteHCO3Shift,
     clDeficit, salineVolumeL, hPlusDeficit, hclVolumeL,
     plateauPressure, drivingPressure, staticCompliance, pfRatio, aAratio, peakPressure, mechanicalPower,

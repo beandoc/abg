@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function collect(){
     return {
-      ph:num('ph'),pco2:num('pco2'),hco3:num('hco3'),na:num('na'),k:num('k'),cl:num('cl'),
+      sampleType: $('sampleType') ? $('sampleType').value : 'ABG',
+      ph:num('ph'),pco2:num('pco2'),hco3:num('hco3'),pvco2:num('pvco2'),na:num('na'),k:num('k'),cl:num('cl'),
       lactate:num('lactate'),albumin:num('albumin'),bun:num('bun'),glucose:num('glucose'),
       measuredOsm:num('measuredOsm'),uNa:num('uNa'),uK:num('uK'),uCl:num('uCl'),
       vent:{mode:$('ventMode').value,fio2:num('fio2'),pao2:num('pao2'),weight:num('weight'),
@@ -106,8 +107,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function populateForm(d){
     if(!d) return;
     const setVal = (id, val) => { const el=$(id); if(el) el.value = (val!=null ? val : ''); };
-    setVal('ph', d.ph); setVal('pco2', d.pco2); setVal('hco3', d.hco3);
+    setVal('sampleType', d.sampleType || 'ABG');
+    setVal('ph', d.ph); setVal('pco2', d.pco2); setVal('hco3', d.hco3); setVal('pvco2', d.pvco2);
     setVal('na', d.na); setVal('k', d.k); setVal('cl', d.cl);
+    const banner = $('vbgHintBanner');
+    if(banner) banner.style.display = (d.sampleType && d.sampleType.startsWith('VBG')) ? 'block' : 'none';
     setVal('lactate', d.lactate); setVal('albumin', d.albumin);
     setVal('bun', d.bun); setVal('glucose', d.glucose);
     setVal('measuredOsm', d.measuredOsm);
@@ -233,6 +237,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const vaultBackdrop = $('vaultBackdrop');
   if(vaultBackdrop) vaultBackdrop.addEventListener('click', closeVault);
+
+  const sampleTypeEl = $('sampleType');
+  if(sampleTypeEl){
+    sampleTypeEl.addEventListener('change', () => {
+      const banner = $('vbgHintBanner');
+      if(banner) banner.style.display = sampleTypeEl.value.startsWith('VBG') ? 'block' : 'none';
+    });
+  }
 
   $('nephroBtn').addEventListener('click', runNephro);
   $('ventSimBtn').addEventListener('click', runVentSim);
