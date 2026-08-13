@@ -104,10 +104,9 @@ ABG.Davenport = (function(){
     return pointInPolygon([patient.ph, patient.hco3], region.poly);
   }
 
-  async function loadRegions(){
+  function loadRegions(){
     if(regionDefs) return;
-    const res = await fetch('assets/davenportRegions.json');
-    const json = await res.json();
+    const json = ABG.DavenportRegions;
     regionDefs = json.regions;
     normalBox = json.normalBox;
     isobarList = json.isobars;
@@ -200,7 +199,13 @@ ABG.Davenport = (function(){
 
     window.addEventListener('resize', () => { if(regionDefs){ renderStatic(); redraw(x,y); } });
 
-    return loadRegions().then(() => { renderStatic(); });
+    // loadRegions() used to be a real network fetch, so renderStatic() (which sets up gAxes/x/y)
+    // was chained via .then() to wait for it. Now that the region data is loaded synchronously
+    // from an embedded script, call both directly and synchronously — chaining through a
+    // microtask left a window where draw() could see regionDefs already set (from loadRegions())
+    // but gAxes not yet built (renderStatic() still pending), and crash on gAxes.selectAll().
+    loadRegions();
+    renderStatic();
   }
 
   function renderStatic(){
@@ -499,8 +504,9 @@ ABG.Davenport = (function(){
   function draw(patientPoint, series){
     lastPatient = patientPoint;
     lastSeries = series || [];
-    if(!regionDefs){ loadRegions().then(() => { renderStatic(); }); return; }
-    redraw(x, y);
+    if(!regionDefs) loadRegions();
+    if(!gAxes) renderStatic(); // renderStatic() also calls redraw(), so it covers this draw() too
+    else redraw(x, y);
   }
 
   return { init, draw };

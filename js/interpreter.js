@@ -31,7 +31,7 @@ ABG.Interpreter = (function(){
     const Hmeas = C.hFromPh(ph);
     const phFromHcalc = C.phFromH(Hcalc);
     const pctDiff = C.pctDiff(Hcalc, Hmeas);
-    S('Step 1 · Internal consistency (Henderson Equation)',
+    S('Internal consistency (Henderson Equation)',
       `Henderson [H⁺] = 24 × ${f1(pco2)}/${f1(hco3)} = <span class="val">${f1(Hcalc)}</span> nmol/L → predicts pH <span class="val">${phFromHcalc.toFixed(2)}</span>; entered pH implies [H⁺] <span class="val">${f1(Hmeas)}</span> nmol/L. `
       + (pctDiff<=20
           ? `Within ${pctDiff.toFixed(0)}% — values are internally consistent.`
@@ -112,7 +112,7 @@ ABG.Interpreter = (function(){
     }
     if(primary.includes('acidosis')||primary.includes('Acidemia')) dxClass='acid';
     else if(primary.includes('alkalosis')||primary.includes('Alkalemia')) dxClass='alk';
-    S('Step 3 · Primary disorder',
+    S('Primary disorder',
       `pH ${ph.toFixed(2)} (pivot 7.40), HCO₃⁻ ${f1(hco3)}, pCO₂ ${f1(pco2)} → <b>${primary}</b>.`);
 
     if(ph < 7.10){
@@ -139,12 +139,12 @@ ABG.Interpreter = (function(){
         // This prevents contradictory recommendations (metAcid triggered by correction artifact).
         const highThreshold = albumin >= 3.5 ? 18 : 17;
         agState = cAG>=highThreshold?'high':(cAG>12?'borderline':(cAG<6?'low':'normal'));
-        S('Step 4 · Anion gap',
+        S('Anion gap',
           `AG = ${na} − (${cl} + ${f1(hco3)}) = <span class="val">${f1(ag)}</span>. Albumin ${f1(albumin)} → corrected AG <span class="val">${f1(cAG)}</span> (${agState}).`
           + `<div class="why">Correcting for albumin matters: each 1 g/dL fall in albumin lowers the measured gap by ~2.5, so a "normal" AG can hide an organic acidosis in a hypoalbuminaemic patient.</div>` + agNote);
       } else {
         cAG=ag; agState = cAG>16?'high':(cAG>12?'borderline':(cAG<6?'low':'normal'));
-        S('Step 4 · Anion gap',
+        S('Anion gap',
           `AG = ${na} − (${cl} + ${f1(hco3)}) = <span class="val">${f1(ag)}</span> (${agState}). Albumin not entered — correction not applied.`
           + (agState==='low'?`<div class="why">A low AG is itself abnormal — consider hypoalbuminaemia (commonest), or unmeasured cations (e.g. IgG paraproteinaemia, lithium, severe hypercalcaemia).</div>`:'') + agNote);
       }
@@ -162,7 +162,7 @@ ABG.Interpreter = (function(){
           naclMsg + `<div class="why">In pure hydration disorders, Na⁺ and Cl⁻ decrease or increase proportionately to preserve the 1.4:1 ratio. Disproportionate chloride shifts indicate primary acid-base disturbances.</div>`);
       }
     } else {
-      S('Step 4 · Anion gap', `Not calculated (Na⁺ or Cl⁻ missing). The AG is the single most important step for uncovering hidden acidosis — enter electrolytes.`);
+      S('Anion gap', `Not calculated (Na⁺ or Cl⁻ missing). The AG is the single most important step for uncovering hidden acidosis — enter electrolytes.`);
     }
 
     // Severe NAGMA & dRTA Triad Detection
@@ -291,12 +291,12 @@ ABG.Interpreter = (function(){
         compLine=`pH, HCO₃⁻, pCO₂ and anion gap all within normal limits.`;
       }
     }
-    S('Step 6 · Expected compensation & mixed check', compLine);
+    S('Expected compensation & mixed check', compLine);
 
     if(forcedMixed && !disorders.some(x=>x.toLowerCase().includes(forcedMixed.toLowerCase()))){
       const isPregnancyPattern = (isPregnant || (ph >= 7.38 && ph <= 7.45 && pco2 >= 26 && pco2 <= 33 && hco3 >= 17 && hco3 <= 22)) && forcedMixed === 'Metabolic acidosis';
       if(isPregnancyPattern){
-        S('Step 6b · Pregnancy Physiology Adaptation',
+        S('Pregnancy Physiology Adaptation',
           `pH ${ph.toFixed(2)} is normal with PaCO₂ ${f1(pco2)} mmHg and HCO₃⁻ ${f1(hco3)} mEq/L. In pregnancy (2nd/3rd trimester), progesterone-driven hyperventilation creates a baseline chronic respiratory alkalosis. The renal response lowers serum HCO₃⁻ to 18–21 mEq/L and Base Excess to −2 to −5 mEq/L. <b>This is expected physiological renal compensation, NOT a true co-existing metabolic acidosis.</b>`);
       } else {
         disorders.push(forcedMixed);
@@ -304,7 +304,7 @@ ABG.Interpreter = (function(){
         else if(forcedMixed==='Metabolic alkalosis' && !flags.metAlk) flags.metAlk={role:'secondary'};
         else if(forcedMixed==='Respiratory acidosis' && !flags.respAcid) flags.respAcid={role:'secondary', deviation:null, marginal:false};
         else if(forcedMixed==='Respiratory alkalosis' && !flags.respAlk) flags.respAlk={role:'secondary', deviation:null, marginal:false};
-        S('Step 6b · Normal pH with a deranged PaCO₂/HCO₃⁻',
+        S('Normal pH with a deranged PaCO₂/HCO₃⁻',
           `pH ${ph.toFixed(2)} is within the normal range despite an abnormal ${primary.includes('Respiratory')?'PaCO₂':'HCO₃⁻'} — compensation limits but never fully normalizes pH, so a normal pH here proves a second, offsetting disorder: <b>${forcedMixed}</b>.`);
       }
     }
@@ -329,7 +329,7 @@ ABG.Interpreter = (function(){
           disorders.push('concurrent metabolic alkalosis');
           flags.metAlk = flags.metAlk || {role:'secondary'};
         }
-        S('Step 8 · ΔAG/ΔHCO₃⁻ ratio (Delta Gap)',
+        S('ΔAG/ΔHCO₃⁻ ratio (Delta Gap)',
           `ΔAG ${f1(dAG)} with serum HCO₃⁻ ${f1(hco3)} (no HCO₃⁻ deficit) — <b>concurrent metabolic alkalosis</b> is elevating bicarbonate back to normal or high levels despite unmeasured acid accumulation.`);
       } else {
         let txt;
@@ -348,7 +348,7 @@ ABG.Interpreter = (function(){
           }
         }
         else {txt='ratio > 2.0 → concurrent metabolic alkalosis (or pre-existing chronic hypercapnia with high baseline HCO₃⁻)'; if(!disorders.includes('concurrent metabolic alkalosis')) disorders.push('concurrent metabolic alkalosis'); flags.metAlk = flags.metAlk || {role:'secondary'};}
-        S('Step 8 · ΔAG/ΔHCO₃⁻ ratio (Delta Gap)',
+        S('ΔAG/ΔHCO₃⁻ ratio (Delta Gap)',
           `ΔAG ${f1(dAG)} / ΔHCO₃⁻ ${f1(dHCO3)} = <span class="val">${ratio.toFixed(2)}</span> — ${txt}.`
           + `<div class="why"><b>Clinical Interpretation:</b> Ratio 1.0–1.6 indicates pure HAGMA (1.6 specifically typical for pure Lactic Acidosis). Ratio &lt; 1.0 indicates mixed HAGMA + Normal-AG (hyperchloremic) acidosis. Ratio &gt; 2.0 indicates mixed HAGMA + Metabolic Alkalosis (HCO₃⁻ inappropriately high).</div>`);
       }
@@ -365,7 +365,7 @@ ABG.Interpreter = (function(){
           // Must also register structurally: this IS a metabolic acidosis, and recommend()
           // has to know that before it can safely say anything about minute ventilation.
           if(!flags.metAcid) flags.metAcid={role:'secondary', highAG:true, agState, masked:true};
-          S('Step 8 · Lactate–AG Mismatch (Masked HAGMA)',
+          S('Lactate–AG Mismatch (Masked HAGMA)',
             `Lactate is markedly high (${f1(lactate)} mmol/L) despite a normal AG (${f1(cAG)}). Anion gap calculation is only ~50% sensitive for HAGMA (often masked by hypoalbuminemia or heavy hyperchloremia). <b>Diagnosis: Triple Acid-Base Disorder (NAGMA + HAGMA + Respiratory Acidosis).</b>`);
         }
       }

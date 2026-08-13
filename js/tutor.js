@@ -18,7 +18,7 @@ ABG.Tutor = (function(){
       description: 'Aspirin overdose presenting post-intubation with severe Triple Disorder: HAGMA + NAGMA/pseudohyperchloremia + Post-intubation Respiratory Acidosis.',
       labs: {
         patientName: 'Case 2 (55F)', patientAge: 55, patientSex: 'F', patientWeight: 62,
-        ph: 7.17, pco2: 37, hco3: 10, na: 147, k: 4.2, cl: 115, lactate: 1.6, albumin: 4.0,
+        ph: 7.05, pco2: 37, hco3: 10, na: 147, k: 4.2, cl: 115, lactate: 1.6, albumin: 4.0,
         bun: 28, glucose: 130, measuredOsm: 317
       }
     },
@@ -116,8 +116,11 @@ ABG.Tutor = (function(){
 
     let deltaPosPct = 50;
     if(deltaRatioVal != null){
-      // Scale: 0 to 3.0
-      deltaPosPct = Math.min(100, Math.max(0, (deltaRatioVal / 2.5) * 100));
+      // Scale: 0 to 3.0 — must match the three equal-width (flex:1) zones below, whose
+      // boundaries at 1.0 and 2.0 sit at exactly 1/3 and 2/3 of the bar. A mismatched divisor
+      // here (previously 2.5) shifts the marker right of its true zone — e.g. a ratio of 0.9,
+      // which Step 8 calls "mixed", would land inside the "Pure HAGMA" band instead of "NAGMA".
+      deltaPosPct = Math.min(100, Math.max(0, (deltaRatioVal / 3.0) * 100));
     }
 
     return `
@@ -164,15 +167,22 @@ ABG.Tutor = (function(){
 
   function renderLacticClassifier(lactate){
     if(lactate == null || lactate <= 2.0) return '';
+    // This is a differential reference, not an automated classifier: the form collects no
+    // haemodynamic data (MAP, pressor use, ScvO2), so there is no signal here to determine
+    // which type actually applies. Previously the Type B node was hardcoded '.active' for
+    // every case above 2.0 mmol/L, including obvious Type A pictures (e.g. septic shock) —
+    // silently pointing at the wrong mechanism. Do not highlight any node until real
+    // haemodynamic/drug-history inputs exist to justify one.
     return `
       <div class="lactic-tree-card">
-        <div class="subhead" style="margin-top:0;">Lactic Acidosis Classifier (Lactate ${lactate} mmol/L)</div>
+        <div class="subhead" style="margin-top:0;">Lactic Acidosis Differential (Lactate ${lactate} mmol/L)</div>
+        <div class="node-desc" style="margin-bottom:8px;">Elevated lactate alone does not identify the mechanism — work through all three against the clinical picture:</div>
         <div class="tree-nodes">
           <div class="tree-node">
             <div class="node-badge type-a">Type A (Hypoxia / Hypoperfusion)</div>
             <div class="node-desc">Sepsis, cardiogenic shock, mesenteric ischemia, severe anemia. Check MAP, ScvO₂, peripheral perfusion.</div>
           </div>
-          <div class="tree-node active">
+          <div class="tree-node">
             <div class="node-badge type-b">Type B (Cellular / Mitochondrial Toxin)</div>
             <div class="node-desc"><b>Mitochondrial Complex I/IV Inhibitors:</b> Linezolid, Metformin, NRTIs, Propofol (PRIS), Malignancy (Warburg effect). Occurs despite normal blood pressure & tissue oxygenation!</div>
           </div>
@@ -213,15 +223,15 @@ ABG.Tutor = (function(){
           <div class="tutor-sub">Walk through the clinical reasoning step-by-step:</div>
         </div>
         <div class="tutor-nav">
-          ${steps.map((s, idx) => `
+          ${steps.map((_, idx) => `
             <button type="button" class="tutor-step-btn ${idx === activeStepIndex ? 'active' : ''}" onclick="ABG.Tutor.setStep(${idx})">
-              ${s.h.split('·')[0].trim()}
+              Step ${idx + 1}
             </button>
           `).join('')}
         </div>
         <div class="tutor-card">
           ${steps[activeStepIndex] ? `
-            <div class="tutor-step-title">${steps[activeStepIndex].h}</div>
+            <div class="tutor-step-title">Step ${activeStepIndex + 1} · ${steps[activeStepIndex].h}</div>
             <div class="tutor-step-body">${steps[activeStepIndex].b}</div>
           ` : ''}
         </div>
@@ -245,10 +255,34 @@ ABG.Tutor = (function(){
     const step = currentAnalysis.r.steps[idx];
     if(card && step){
       card.innerHTML = `
-        <div class="tutor-step-title">${step.h}</div>
+        <div class="tutor-step-title">Step ${idx + 1} · ${step.h}</div>
         <div class="tutor-step-body">${step.b}</div>
       `;
     }
+  }
+
+  function renderPresetPicker(){
+    const box = document.getElementById('presetCaseContainer');
+    if(!box) return;
+    const chev = `<svg class="chev" viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    box.innerHTML = `
+      <div class="card">
+        <button type="button" class="card-summary" data-collapse="presetCasesCard" aria-expanded="false">
+          <span>🧪 Real-World Clinical Preset Cases <em>Load a worked teaching example</em></span>
+          ${chev}
+        </button>
+        <div class="card-body collapsible" id="presetCasesCard">
+          <div class="preset-case-list">
+            ${Object.entries(PRESETS).map(([key, p]) => `
+              <button type="button" class="preset-case-item" onclick="ABG.Tutor.loadPreset('${key}')">
+                <span class="preset-case-title">${p.title}</span>
+                <span class="preset-case-desc">${p.description}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   function attachUI(){
@@ -262,6 +296,8 @@ ABG.Tutor = (function(){
       tutorBox.id = 'tutorContainer';
       outDiv.parentNode.insertBefore(tutorBox, outDiv.nextSibling);
     }
+
+    renderPresetPicker();
   }
 
   function updateTutorView(r, d){

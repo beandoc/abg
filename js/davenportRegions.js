@@ -1,4 +1,11 @@
-{
+window.ABG = window.ABG || {};
+
+// Davenport-diagram compensation band definitions. Was previously fetched at runtime from
+// assets/davenportRegions.json — that fails with a CORS error when the app is opened directly
+// via file:// (no server), since browsers block fetch() across the null file:// origin. Loading
+// it as a plain script tag instead works identically over file:// and http(s), with no async
+// round trip for what is static config data.
+ABG.DavenportRegions = {
   "normalBox": {"phMin": 7.35, "phMax": 7.45, "hco3Min": 22, "hco3Max": 26},
 
   "regions": [
@@ -71,4 +78,4 @@
   ],
 
   "isobars": [20, 30, 40, 60, 80]
-}
+};

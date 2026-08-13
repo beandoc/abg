@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="expand-badge">Expand Rationale</span>
         </summary>
         <div class="steps-transcript-body">
-          ${r.steps.map(s=>`<div class="step"><div class="h">${s.h}</div><div class="b">${s.b}</div></div>`).join('')}
+          ${r.steps.map((s,idx)=>`<div class="step"><div class="h">Step ${idx+1} · ${s.h}</div><div class="b">${s.b}</div></div>`).join('')}
         </div>
       </details>
     `;
