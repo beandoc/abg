@@ -205,7 +205,7 @@ ABG.Interpreter = (function(){
       disorders.push(agLabel('Metabolic acidosis'));
       flags.metAcid = {role:'primary', highAG, agState};
       const exp=C.metAcidExpectedPCO2(hco3);
-      compLine=`Expected pCO₂ = 40 − [1.2 × (24 − ${f1(hco3)})] = <span class="val">${f1(exp)}</span> ± 2 (i.e. ${f1(exp-2)}–${f1(exp+2)}).`;
+      compLine=`Expected pCO₂ (Winter's formula) = 1.5 × ${f1(hco3)} + 8 = <span class="val">${f1(exp)}</span> ± 2 (i.e. ${f1(exp-2)}–${f1(exp+2)}).`;
       if(pco2>exp+2){
         const excess=pco2-exp, marginal=excess<=MARGINAL_PCO2;
         disorders.push('concurrent respiratory acidosis');

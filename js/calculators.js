@@ -18,7 +18,8 @@ ABG.Calculators = (function(){
 
   // Adrogué–Madias secondary-response rule for metabolic acidosis (ICU Book Eq. 31.3/31.4):
   // Expected PaCO2 = 40 - [1.2 x (24 - current HCO3)]
-  function metAcidExpectedPCO2(hco3){ return 40 - 1.2 * (NORMALS.HCO3 - hco3); }
+  // Classic Winter's formula (Winter et al., 1967): PaCO2 = 1.5 x [HCO3] + 8 (+/- 2).
+  function metAcidExpectedPCO2(hco3){ return 1.5 * hco3 + 8; }
   function metAlkExpectedPCO2(hco3){ return 40 + 0.7 * (hco3 - NORMALS.HCO3); }
   function respAcidAcuteHCO3(pco2){ return NORMALS.HCO3 + 0.1 * (pco2 - NORMALS.PCO2); }
   function respAcidChronicHCO3(pco2){ return NORMALS.HCO3 + 0.4 * (pco2 - NORMALS.PCO2); }

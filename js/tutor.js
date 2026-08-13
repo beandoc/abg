@@ -96,9 +96,9 @@ ABG.Tutor = (function(){
     // is renal/HCO3-based, not a pCO2 target), so leave it unset in that case.
     let expPCO2Min = null, expPCO2Max = null, expPCO2Mid = null;
     if(hco3 != null && r.primary === 'Metabolic acidosis'){
-      expPCO2Mid = 40 - 1.2 * (24 - hco3);
+      expPCO2Mid = ABG.Calculators.metAcidExpectedPCO2(hco3);
     } else if(hco3 != null && r.primary === 'Metabolic alkalosis'){
-      expPCO2Mid = 40 + 0.7 * (hco3 - 24);
+      expPCO2Mid = ABG.Calculators.metAlkExpectedPCO2(hco3);
     }
     if(expPCO2Mid != null){
       expPCO2Min = Math.max(10, expPCO2Mid - 2);
